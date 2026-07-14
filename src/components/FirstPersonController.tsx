@@ -26,19 +26,26 @@ export default function FirstPersonController() {
   useFrame((_, delta) => {
     const { forward, backward, left, right } = keys.current;
 
-    frontVector.current.set(0, 0, Number(backward) - Number(forward));
-    sideVector.current.set(Number(left) - Number(right), 0, 0);
+    camera.getWorldDirection(frontVector.current);
+    frontVector.current.y = 0;
+    frontVector.current.normalize();
 
-    direction.current
-      .subVectors(frontVector.current, sideVector.current)
-      .normalize()
-      .multiplyScalar(MOVE_SPEED * delta);
-    direction.current.applyEuler(
-      new THREE.Euler(0, camera.rotation.y, 0)
-    );
+    sideVector.current.crossVectors(frontVector.current, camera.up).normalize();
 
-    const nextX = camera.position.x - direction.current.x;
-    const nextZ = camera.position.z - direction.current.z;
+    const forwardAmount = Number(forward) - Number(backward);
+    const rightAmount = Number(right) - Number(left);
+
+    direction.current.set(0, 0, 0);
+    if (forwardAmount !== 0 || rightAmount !== 0) {
+      direction.current
+        .addScaledVector(frontVector.current, forwardAmount)
+        .addScaledVector(sideVector.current, rightAmount)
+        .normalize()
+        .multiplyScalar(MOVE_SPEED * delta);
+    }
+
+    const nextX = camera.position.x + direction.current.x;
+    const nextZ = camera.position.z + direction.current.z;
 
     // Collision sederhana: clamp posisi kamera di dalam batas ruangan.
     camera.position.set(
