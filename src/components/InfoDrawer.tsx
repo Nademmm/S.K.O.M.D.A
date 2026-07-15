@@ -1,40 +1,28 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import {
-  CATEGORY_LABEL,
-  type ExhibitIcon,
-  type ExhibitItem,
-} from "@/utils/museumData";
+import { AnimatePresence, motion } from "framer-motion";
+import { CATEGORY_LABEL, type ExhibitItem } from "@/utils/museumData";
 import styles from "./InfoDrawer.module.css";
 
 interface InfoDrawerProps {
-  /** Item yang dipilih; null berarti popup tertutup */
+  /** Selected exhibit; null means the drawer is closed */
   item: ExhibitItem | null;
   onClose: () => void;
 }
-
-/** Emoji sederhana sebagai ikon kategori di header popup (tanpa asset) */
-const ICON_GLYPH: Record<ExhibitIcon, string> = {
-  clock: "⏰",
-  uniform: "👔",
-  class: "📚",
-  broom: "🧹",
-  shield: "🛡️",
-  greeting: "🤝",
-  hands: "🤲",
-  trophy: "🏆",
-  flag: "🚩",
-  culture: "🏛️",
-};
 
 const FOCUSABLE_SELECTOR =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 /**
- * Panel informasi mengambang dengan estetika liquid glass.
- * Kartu translusen di kanan tengah layar — museum tetap terlihat di belakang
- * sambil menjaga keterbacaan teks. Konten dipertahankan selama animasi tutup.
+ * Museum artifact information panel.
+ *
+ * A floating asymmetric surface that emerges from the environment.
+ * Information is discovered, not displayed. Typography is the hero.
+ *
+ * Motion: slow, calm, confident — like an object gently settling into space.
+ * Surface: layered materials with editorial rhythm.
+ * Accent: appears only at the hairline rule. Restrained.
  */
 export default function InfoDrawer({ item, onClose }: InfoDrawerProps) {
   const open = item !== null;
@@ -42,20 +30,22 @@ export default function InfoDrawer({ item, onClose }: InfoDrawerProps) {
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dialogRef = useRef<HTMLElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
-  const titleId = "info-popup-title";
+  const titleId = "info-drawer-title";
 
+  // Keep content visible during close animation
   useEffect(() => {
     if (item) {
       if (closeTimer.current) clearTimeout(closeTimer.current);
       setDisplayItem(item);
     } else {
-      closeTimer.current = setTimeout(() => setDisplayItem(null), 300);
+      closeTimer.current = setTimeout(() => setDisplayItem(null), 800);
     }
     return () => {
       if (closeTimer.current) clearTimeout(closeTimer.current);
     };
   }, [item]);
 
+  // Escape key closes drawer
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -65,6 +55,7 @@ export default function InfoDrawer({ item, onClose }: InfoDrawerProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
+  // Focus management: trap focus inside dialog, restore on close
   useEffect(() => {
     if (!open || !dialogRef.current) return;
 
@@ -96,78 +87,95 @@ export default function InfoDrawer({ item, onClose }: InfoDrawerProps) {
     };
   }, [open]);
 
-  const accent = displayItem?.color ?? "#22d3ee";
+  const accent = displayItem?.color ?? "#9a9590";
 
   return (
     <>
+      {/* Scrim — barely-there veil; museum remains visible */}
       <div
         onClick={onClose}
         aria-hidden={!open}
         className={`${styles.scrim} ${open ? styles.scrimOpen : ""}`}
       />
 
+      {/* Floating composition */}
       <div className={styles.positioner}>
-        <aside
-          ref={dialogRef}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby={displayItem ? titleId : undefined}
-          aria-hidden={!open}
-          className={`${styles.card} ${open ? styles.cardOpen : ""}`}
-          style={{ "--accent": accent } as React.CSSProperties}
-        >
-          {displayItem && (
-            <>
-              <header className={styles.header}>
-                <div className={styles.headerTop}>
-                  <span className={styles.badge}>
+        <AnimatePresence>
+          {open && displayItem && (
+            <motion.aside
+              ref={dialogRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={titleId}
+              className={`${styles.panel} ${styles.panelOpen}`}
+              style={{ "--accent": accent } as React.CSSProperties}
+              // Motion: opacity + subtle translation + tiny scale. No bounce.
+              initial={{ opacity: 0, y: 14, scale: 0.975 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 8, scale: 0.985 }}
+              transition={{
+                duration: 0.72,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+            >
+              {/* Layer 2: Darker reading surface, slightly inset */}
+              <div className={styles.innerSurface}>
+                {/* Top row: category + close glyph */}
+                <div className={styles.topRow}>
+                  <span className={styles.categoryLabel}>
                     {CATEGORY_LABEL[displayItem.category]}
                   </span>
                   <button
                     ref={closeBtnRef}
                     type="button"
                     onClick={onClose}
-                    aria-label="Tutup"
-                    className={styles.closeBtn}
+                    aria-label="Close"
+                    className={styles.closeGlyph}
                   >
-                    ✕
+                    <span aria-hidden="true" style={{ fontWeight: 100, fontSize: 15, lineHeight: 1 }}>
+                      ×
+                    </span>
                   </button>
                 </div>
 
-                <div className={styles.headerMain}>
-                  <div className={styles.iconContainer} aria-hidden="true">
-                    {ICON_GLYPH[displayItem.icon]}
-                  </div>
-                  <h2 id={titleId} className={styles.title}>
-                    {displayItem.title}
-                  </h2>
-                </div>
-              </header>
+                {/* Title — the hero of the composition */}
+                <h2 id={titleId} className={styles.title}>
+                  {displayItem.title}
+                </h2>
 
-              <div className={styles.content}>
-                <div className={styles.textSurface}>
-                  <div className={styles.quote}>
-                    <p className={styles.quoteText}>
-                      &ldquo;{displayItem.highlight}&rdquo;
-                    </p>
-                  </div>
+                {/* Hairline rule — the only place accent color appears */}
+                <div
+                  className={styles.accentLine}
+                  aria-hidden="true"
+                  style={{ background: accent }}
+                />
 
+                {/* Scrollable content: quote + description */}
+                <div className={styles.contentArea}>
+                  <p className={styles.pullQuote}>
+                    &ldquo;{displayItem.highlight}&rdquo;
+                  </p>
                   <p className={styles.bodyText}>{displayItem.description}</p>
                 </div>
-              </div>
 
-              <footer className={styles.footer}>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className={styles.primaryBtn}
-                >
-                  Kembali Menjelajah
-                </button>
-              </footer>
-            </>
+                {/* Action — visible, accessible, still integrated */}
+                <div style={{ marginTop: "auto", paddingTop: 36 }}>
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className={styles.actionText}
+                    aria-label="Close panel and return to exploring the museum"
+                  >
+                    Kembali Menjelajah
+                    <span className={styles.actionArrow} aria-hidden="true">
+                      →
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </motion.aside>
           )}
-        </aside>
+        </AnimatePresence>
       </div>
     </>
   );
