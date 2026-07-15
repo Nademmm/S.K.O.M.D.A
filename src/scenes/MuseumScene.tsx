@@ -48,8 +48,7 @@ export default function MuseumScene({ onSelectExhibit }: MuseumSceneProps) {
         position={[6, 10, 4]}
         intensity={1.1}
         castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
+        shadow-mapSize={[2048, 2048]}
         shadow-camera-left={-15}
         shadow-camera-right={15}
         shadow-camera-top={15}

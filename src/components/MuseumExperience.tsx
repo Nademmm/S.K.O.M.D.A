@@ -1,29 +1,54 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useCallback } from "react";
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 import FirstPersonController from "@/components/FirstPersonController";
 import InfoPopup from "@/components/InfoPopup";
+import LandingOverlay from "@/components/LandingOverlay";
+import CinematicCamera from "@/components/CinematicCamera";
 import MuseumScene from "@/scenes/MuseumScene";
 import type { ExhibitItem } from "@/utils/museumData";
+
+type AppState = "idle" | "cinematic" | "exploring";
 
 /**
  * Komponen utama pengalaman museum: membungkus Canvas Three.js,
  * mengelola state popup, dan menampilkan overlay UI (crosshair, instruksi).
+ *
+ * State machine:
+ *   idle       → Landing page overlay visible, 3D scene renders in background
+ *   cinematic  → Camera flythrough animation, overlay faded out
+ *   exploring  → First-person controls active, pointer-lock engaged
  */
 export default function MuseumExperience() {
   const [selected, setSelected] = useState<ExhibitItem | null>(null);
-  const [started, setStarted] = useState(false);
+  const [appState, setAppState] = useState<AppState>("idle");
+
+  const handleEnter = useCallback(() => {
+    setAppState("cinematic");
+  }, []);
+
+  const handleCinematicComplete = useCallback(() => {
+    setAppState("exploring");
+  }, []);
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-black">
+    <div
+      style={{
+        position: "relative",
+        height: "100vh",
+        width: "100vw",
+        overflow: "hidden",
+        background: "#000",
+      }}
+    >
       <Canvas
         shadows
         camera={{ fov: 75, near: 0.1, far: 100, position: [0, 1.6, 8] }}
         gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping }}
         onCreated={({ gl }) => {
-          gl.shadowMap.type = THREE.PCFSoftShadowMap;
+          gl.shadowMap.type = THREE.PCFShadowMap;
         }}
       >
         <color attach="background" args={["#0f172a"]} />
@@ -31,31 +56,52 @@ export default function MuseumExperience() {
         <Suspense fallback={null}>
           <MuseumScene onSelectExhibit={setSelected} />
         </Suspense>
-        <FirstPersonController />
+
+        {/* Cinematic flythrough — only during cinematic state */}
+        {appState === "cinematic" && (
+          <CinematicCamera onComplete={handleCinematicComplete} />
+        )}
+
+        {/* First-person controls — only active when exploring */}
+        <FirstPersonController enabled={appState === "exploring"} />
       </Canvas>
 
-      {/* Crosshair */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/80 shadow" />
-
-      {/* Overlay instruksi awal */}
-      {!started && (
+      {/* Crosshair — only visible while exploring */}
+      {appState === "exploring" && (
         <div
-          className="absolute inset-0 z-40 flex cursor-pointer flex-col items-center justify-center gap-4 bg-black/70 text-center text-white"
-          onClick={() => setStarted(true)}
-        >
-          <h1 className="text-3xl font-bold">SKOMDA Virtual Museum</h1>
-          <p className="max-w-md text-sm text-zinc-300">
-            Klik untuk masuk &amp; mengunci kursor. Gunakan{" "}
-            <span className="font-semibold">WASD / Arrow Keys</span> untuk
-            berjalan, gerakkan mouse untuk menoleh, dan klik objek untuk
-            melihat informasinya.
-          </p>
-          <span className="rounded-full bg-white/10 px-5 py-2 text-sm font-medium">
-            Mulai Menjelajah
-          </span>
-        </div>
+          style={{
+            pointerEvents: "none",
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            width: 8,
+            height: 8,
+            transform: "translate(-50%, -50%)",
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.8)",
+            boxShadow: "0 0 6px rgba(255,255,255,0.3)",
+          }}
+        />
       )}
 
+      {/* Cinematic vignette overlay during camera flythrough */}
+      {appState === "cinematic" && (
+        <div
+          style={{
+            pointerEvents: "none",
+            position: "absolute",
+            inset: 0,
+            background:
+              "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.5) 100%)",
+            zIndex: 30,
+          }}
+        />
+      )}
+
+      {/* Landing overlay — visible only in idle state */}
+      {appState === "idle" && <LandingOverlay onEnter={handleEnter} />}
+
+      {/* Info popup for clicked exhibits */}
       {selected && (
         <InfoPopup item={selected} onClose={() => setSelected(null)} />
       )}

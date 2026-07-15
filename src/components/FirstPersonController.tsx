@@ -12,11 +12,18 @@ const ROOM_HALF_DEPTH = 13; // batas collision sumbu Z
 const PLAYER_RADIUS = 0.5;
 const EYE_HEIGHT = 1.6;
 
+interface FirstPersonControllerProps {
+  /** When false, movement is frozen and Pointer Lock is not rendered. */
+  enabled?: boolean;
+}
+
 /**
  * Kontrol first-person: WASD/arrow untuk bergerak, mouse (Pointer Lock) untuk
  * menoleh, dengan collision sederhana berupa batas kotak ruangan museum.
  */
-export default function FirstPersonController() {
+export default function FirstPersonController({
+  enabled = true,
+}: FirstPersonControllerProps) {
   const { camera } = useThree();
   const keys = useKeyboardControls();
   const direction = useRef(new THREE.Vector3());
@@ -24,6 +31,8 @@ export default function FirstPersonController() {
   const sideVector = useRef(new THREE.Vector3());
 
   useFrame((_, delta) => {
+    if (!enabled) return;
+
     const { forward, backward, left, right } = keys.current;
 
     camera.getWorldDirection(frontVector.current);
@@ -62,6 +71,10 @@ export default function FirstPersonController() {
       )
     );
   });
+
+  // Only mount PointerLockControls when enabled — this prevents premature
+  // pointer-lock requests during the cinematic sequence.
+  if (!enabled) return null;
 
   return <PointerLockControls />;
 }
