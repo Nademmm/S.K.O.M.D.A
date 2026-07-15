@@ -156,7 +156,7 @@ export default function MuseumExperience() {
         </div>
       )}
 
-      {/* Info drawer for clicked exhibits */}
+      {/* Floating info popup for clicked exhibits */}
       <InfoDrawer item={selected} onClose={() => setSelected(null)} />
     </div>
   );
