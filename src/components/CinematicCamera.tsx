@@ -1,10 +1,12 @@
 "use client";
 
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useEffect, useMemo } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
 interface CinematicCameraProps {
+  /** If true, the camera flies through the path. If false, it holds the start position. */
+  playing: boolean;
   /** Called once the flythrough finishes. */
   onComplete: () => void;
 }
@@ -12,37 +14,20 @@ interface CinematicCameraProps {
 /** Total duration of the cinematic sweep in seconds. */
 const DURATION = 4.5;
 
-/**
- * Waypoints the camera flies through.
- * Each entry: { position: [x,y,z], lookAt: [x,y,z], t: normalised time 0‥1 }
- */
-const WAYPOINTS: { pos: THREE.Vector3; lookAt: THREE.Vector3; t: number }[] = [
-  {
-    pos: new THREE.Vector3(0, 12, 20),
-    lookAt: new THREE.Vector3(0, 2, 0),
-    t: 0,
-  },
-  {
-    pos: new THREE.Vector3(10, 8, 10),
-    lookAt: new THREE.Vector3(0, 1, 0),
-    t: 0.25,
-  },
-  {
-    pos: new THREE.Vector3(8, 5, -2),
-    lookAt: new THREE.Vector3(0, 2, -4),
-    t: 0.5,
-  },
-  {
-    pos: new THREE.Vector3(2, 3, 2),
-    lookAt: new THREE.Vector3(0, 1.6, -3),
-    t: 0.75,
-  },
-  {
-    // Final position = first-person spawn point
-    pos: new THREE.Vector3(0, 1.6, 8),
-    lookAt: new THREE.Vector3(0, 1.6, 0),
-    t: 1,
-  },
+const WAYPOINTS = [
+  new THREE.Vector3(0, 12, 20),
+  new THREE.Vector3(10, 8, 10),
+  new THREE.Vector3(8, 5, -2),
+  new THREE.Vector3(2, 3, 2),
+  new THREE.Vector3(0, 1.6, 8), // Final position = first-person spawn point
+];
+
+const LOOK_AT_TARGETS = [
+  new THREE.Vector3(0, 2, 0),
+  new THREE.Vector3(0, 1, 0),
+  new THREE.Vector3(0, 2, -4),
+  new THREE.Vector3(0, 1.6, -3),
+  new THREE.Vector3(0, 1.6, 0),
 ];
 
 /**
@@ -53,47 +38,19 @@ function smoothStep(t: number): number {
 }
 
 /**
- * Find the two surrounding waypoints for a given normalised time,
- * then interpolate position and lookAt.
- */
-function samplePath(
-  normTime: number,
-  outPos: THREE.Vector3,
-  outLook: THREE.Vector3
-) {
-  const t = Math.min(1, Math.max(0, normTime));
-
-  // Find the segment
-  let segStart = WAYPOINTS[0];
-  let segEnd = WAYPOINTS[WAYPOINTS.length - 1];
-
-  for (let i = 0; i < WAYPOINTS.length - 1; i++) {
-    if (t >= WAYPOINTS[i].t && t <= WAYPOINTS[i + 1].t) {
-      segStart = WAYPOINTS[i];
-      segEnd = WAYPOINTS[i + 1];
-      break;
-    }
-  }
-
-  const segDuration = segEnd.t - segStart.t;
-  const segT = segDuration > 0 ? (t - segStart.t) / segDuration : 1;
-  const eased = smoothStep(segT);
-
-  outPos.lerpVectors(segStart.pos, segEnd.pos, eased);
-  outLook.lerpVectors(segStart.lookAt, segEnd.lookAt, eased);
-}
-
-/**
  * CinematicCamera — animated flythrough that sweeps above and around
- * the museum, then descends to the player's eye level.
- * Calls `onComplete` once done so the parent can switch to explore mode.
+ * the museum, then descends to the player's eye level using smooth CatmullRom splines.
  */
-export default function CinematicCamera({ onComplete }: CinematicCameraProps) {
+export default function CinematicCamera({ playing, onComplete }: CinematicCameraProps) {
   const { camera } = useThree();
   const elapsed = useRef(0);
   const done = useRef(false);
   const tmpPos = useRef(new THREE.Vector3());
   const tmpLook = useRef(new THREE.Vector3());
+
+  // Create smooth spline curves for position and lookAt
+  const positionCurve = useMemo(() => new THREE.CatmullRomCurve3(WAYPOINTS, false, 'centripetal'), []);
+  const lookAtCurve = useMemo(() => new THREE.CatmullRomCurve3(LOOK_AT_TARGETS, false, 'centripetal'), []);
 
   const finish = useCallback(() => {
     if (!done.current) {
@@ -102,13 +59,28 @@ export default function CinematicCamera({ onComplete }: CinematicCameraProps) {
     }
   }, [onComplete]);
 
+  // Handle the idle state (when mounted but playing is false)
+  // Ensure the camera starts exactly at the first waypoint to prevent teleports
+  useEffect(() => {
+    if (!playing && !done.current) {
+      positionCurve.getPoint(0, tmpPos.current);
+      lookAtCurve.getPoint(0, tmpLook.current);
+      camera.position.copy(tmpPos.current);
+      camera.lookAt(tmpLook.current);
+    }
+  }, [playing, camera, positionCurve, lookAtCurve]);
+
   useFrame((_, delta) => {
-    if (done.current) return;
+    if (!playing || done.current) return;
 
     elapsed.current += delta;
     const norm = Math.min(elapsed.current / DURATION, 1);
+    const eased = smoothStep(norm);
 
-    samplePath(norm, tmpPos.current, tmpLook.current);
+    // Sample the splines at the eased time
+    positionCurve.getPoint(eased, tmpPos.current);
+    lookAtCurve.getPoint(eased, tmpLook.current);
+
     camera.position.copy(tmpPos.current);
     camera.lookAt(tmpLook.current);
 
