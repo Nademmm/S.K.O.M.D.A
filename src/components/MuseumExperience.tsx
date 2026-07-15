@@ -4,7 +4,7 @@ import { Suspense, useState, useCallback } from "react";
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 import FirstPersonController from "@/components/FirstPersonController";
-import InfoPopup from "@/components/InfoPopup";
+import InfoDrawer from "@/components/InfoDrawer";
 import LandingOverlay from "@/components/LandingOverlay";
 import CinematicCamera from "@/components/CinematicCamera";
 import MuseumScene from "@/scenes/MuseumScene";
@@ -156,10 +156,8 @@ export default function MuseumExperience() {
         </div>
       )}
 
-      {/* Info popup for clicked exhibits */}
-      {selected && (
-        <InfoPopup item={selected} onClose={() => setSelected(null)} />
-      )}
+      {/* Info drawer for clicked exhibits */}
+      <InfoDrawer item={selected} onClose={() => setSelected(null)} />
     </div>
   );
 }
