@@ -1,0 +1,430 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   TelkomVerse — HUD Shell
+   Light · Minimal · Museum Aesthetic
+   All four corner zones + center crosshair layer
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Root overlay ─────────────────────────────────────────────────────── */
+
+.hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+  font-family: var(--font-body), "Inter", system-ui, sans-serif;
+}
+
+/* ── Glass pill utility ───────────────────────────────────────────────── */
+
+.glassPill {
+  background: var(--museum-glass, rgba(238,238,238,0.80));
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid var(--museum-glass-border, rgba(0,0,0,0.08));
+  box-shadow: var(--museum-shadow-sm);
+  border-radius: 14px;
+  pointer-events: auto;
+}
+
+/* ════════════════════════════════════════════════════
+   TOP LEFT — Logo
+   ════════════════════════════════════════════════════ */
+
+.topLeft {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px 8px 10px;
+}
+
+.logoMark {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #CB2957;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.logoMark svg {
+  width: 18px;
+  height: 18px;
+}
+
+.logoText {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.logoName {
+  font-family: var(--font-heading, "Poppins"), sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: #000;
+}
+
+.logoSub {
+  font-family: var(--font-body, "Inter"), sans-serif;
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.45);
+  line-height: 1;
+  margin-top: 2px;
+}
+
+/* ════════════════════════════════════════════════════
+   TOP CENTER — Objective Banner
+   ════════════════════════════════════════════════════ */
+
+.topCenter {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.objectiveBanner {
+  padding: 8px 18px 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.objectiveIcon {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #CB2957;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px rgba(203,41,87,0.18);
+  animation: objectivePulse 2.4s ease-in-out infinite;
+}
+
+@keyframes objectivePulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(203,41,87,0.18); }
+  50%       { box-shadow: 0 0 0 5px rgba(203,41,87,0.08); }
+}
+
+.objectiveLabel {
+  font-family: var(--font-body, "Inter"), sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: rgba(0,0,0,0.55);
+  text-transform: uppercase;
+}
+
+.objectiveTitle {
+  font-family: var(--font-heading, "Poppins"), sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #000;
+}
+
+.objectiveSep {
+  width: 1px;
+  height: 16px;
+  background: rgba(0,0,0,0.12);
+}
+
+.objectiveCount {
+  font-family: var(--font-body, "Inter"), sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(0,0,0,0.45);
+}
+
+.objectiveCount strong {
+  color: #CB2957;
+  font-weight: 700;
+}
+
+/* ════════════════════════════════════════════════════
+   TOP RIGHT — Icon Cluster
+   ════════════════════════════════════════════════════ */
+
+.topRight {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.iconBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--museum-glass, rgba(238,238,238,0.80));
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid var(--museum-glass-border, rgba(0,0,0,0.08));
+  box-shadow: var(--museum-shadow-sm);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  pointer-events: auto;
+  color: rgba(0,0,0,0.65);
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.iconBtn:hover {
+  background: var(--museum-glass-heavy, rgba(238,238,238,0.92));
+  border-color: rgba(203,41,87,0.35);
+  color: #CB2957;
+  transform: translateY(-1px);
+  box-shadow: var(--museum-shadow-md);
+}
+
+.iconBtn:active {
+  transform: translateY(0);
+}
+
+.iconBtn.muted {
+  color: rgba(0,0,0,0.28);
+}
+
+/* ════════════════════════════════════════════════════
+   BOTTOM LEFT — Minimap
+   ════════════════════════════════════════════════════ */
+
+.bottomLeft {
+  position: absolute;
+  bottom: 24px;
+  left: 20px;
+}
+
+.minimapWrap {
+  padding: 6px;
+  border-radius: 50%;
+}
+
+.minimapCanvas {
+  display: block;
+  border-radius: 50%;
+  background: rgba(238,238,238,0.60);
+}
+
+.minimapLabel {
+  text-align: center;
+  font-family: var(--font-body, "Inter"), sans-serif;
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.38);
+  margin-top: 5px;
+}
+
+/* ════════════════════════════════════════════════════
+   BOTTOM CENTER — Interaction Prompt
+   ════════════════════════════════════════════════════ */
+
+.bottomCenter {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.interactPrompt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px 7px 10px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.keycap {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: rgba(238,238,238,0.92);
+  border: 1px solid rgba(0,0,0,0.14);
+  border-bottom: 2px solid rgba(0,0,0,0.18);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.8) inset;
+  font-family: var(--font-heading, "Poppins"), sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #CB2957;
+  flex-shrink: 0;
+}
+
+.promptText {
+  font-family: var(--font-body, "Inter"), sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(0,0,0,0.65);
+}
+
+/* ════════════════════════════════════════════════════
+   BOTTOM RIGHT — Completion
+   ════════════════════════════════════════════════════ */
+
+.bottomRight {
+  position: absolute;
+  bottom: 24px;
+  right: 20px;
+  width: 160px;
+  padding: 12px 14px;
+  border-radius: 14px;
+}
+
+.completionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.completionLabel {
+  font-family: var(--font-body, "Inter"), sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.38);
+}
+
+.completionPercent {
+  font-family: var(--font-heading, "Poppins"), sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #000;
+  line-height: 1;
+}
+
+.completionPercent span {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(0,0,0,0.45);
+}
+
+.progressTrack {
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(0,0,0,0.10);
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 2px;
+  background: #CB2957;
+  transition: width 600ms cubic-bezier(0.16,1,0.3,1);
+}
+
+.completionCount {
+  font-family: var(--font-body, "Inter"), sans-serif;
+  font-size: 10px;
+  color: rgba(0,0,0,0.40);
+  text-align: right;
+}
+
+/* ════════════════════════════════════════════════════
+   CENTER — Crosshair
+   ════════════════════════════════════════════════════ */
+
+.crosshairWrap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 25;
+}
+
+/* Gap crosshair — 4 separate segments */
+.crosshair {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  transition: transform 200ms cubic-bezier(0.34,1.56,0.64,1);
+}
+
+.crosshair.interacting {
+  transform: scale(1.15);
+}
+
+.crosshairSeg {
+  position: absolute;
+  border-radius: 1px;
+  transition: background 200ms ease, box-shadow 200ms ease;
+}
+
+/* Top */
+.crosshairSeg:nth-child(1) {
+  width: 2px;
+  height: 6px;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+/* Bottom */
+.crosshairSeg:nth-child(2) {
+  width: 2px;
+  height: 6px;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+/* Left */
+.crosshairSeg:nth-child(3) {
+  width: 6px;
+  height: 2px;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+/* Right */
+.crosshairSeg:nth-child(4) {
+  width: 6px;
+  height: 2px;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.crosshair .crosshairSeg {
+  background: rgba(255,255,255,0.85);
+  box-shadow: 0 0 4px rgba(0,0,0,0.5);
+}
+
+.crosshair.interacting .crosshairSeg {
+  background: #CB2957;
+  box-shadow: 0 0 8px rgba(203,41,87,0.6);
+}
+
+/* Interaction ring that appears when pointing at object */
+.crosshairRing {
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(203,41,87,0.7);
+  animation: crosshairRingPulse 1s ease-in-out infinite;
+}
+
+@keyframes crosshairRingPulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50%       { opacity: 0.3; transform: scale(1.15); }
+}

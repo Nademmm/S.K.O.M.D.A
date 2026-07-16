@@ -5,46 +5,49 @@ interface SettingsButtonProps {
 }
 
 /**
- * Tombol gear kaca kecil di pojok kanan atas untuk membuka Settings Panel
- * selagi menjelajah.
+ * Tombol gear putih kaca di HUD — digunakan hanya sebagai fallback
+ * jika HudShell tidak terpasang. Saat menjelajah, HudShell yang menangani
+ * tombol settings di cluster ikon kanan atas.
  */
 export default function SettingsButton({ onClick }: SettingsButtonProps) {
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label="Open settings"
+      aria-label="Buka pengaturan"
       style={{
         position: "absolute",
         top: 16,
         right: 16,
         zIndex: 50,
-        width: 44,
-        height: 44,
+        width: 40,
+        height: 40,
         display: "grid",
         placeItems: "center",
         borderRadius: 12,
-        border: "1px solid rgba(148,163,184,0.24)",
-        background: "rgba(15,23,42,0.55)",
-        backdropFilter: "blur(10px)",
-        WebkitBackdropFilter: "blur(10px)",
-        color: "rgba(226,232,240,0.85)",
+        border: "1px solid rgba(0,0,0,0.08)",
+        background: "rgba(238,238,238,0.80)",
+        backdropFilter: "blur(16px) saturate(160%)",
+        WebkitBackdropFilter: "blur(16px) saturate(160%)",
+        color: "rgba(0,0,0,0.65)",
         cursor: "pointer",
-        boxShadow: "0 6px 18px -8px rgba(0,0,0,0.6)",
-        transition: "transform 160ms ease, background 160ms ease, color 160ms ease",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+        transition: "transform 160ms ease, background 160ms ease, border-color 160ms ease, color 160ms ease",
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.background = "rgba(56,189,248,0.16)";
-        e.currentTarget.style.color = "#e8eef7";
+        e.currentTarget.style.background = "rgba(238,238,238,0.92)";
+        e.currentTarget.style.borderColor = "rgba(203,41,87,0.35)";
+        e.currentTarget.style.color = "#CB2957";
         e.currentTarget.style.transform = "translateY(-1px)";
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.background = "rgba(15,23,42,0.55)";
-        e.currentTarget.style.color = "rgba(226,232,240,0.85)";
+        e.currentTarget.style.background = "rgba(238,238,238,0.80)";
+        e.currentTarget.style.borderColor = "rgba(0,0,0,0.08)";
+        e.currentTarget.style.color = "rgba(0,0,0,0.65)";
         e.currentTarget.style.transform = "translateY(0)";
       }}
     >
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path
           d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
           stroke="currentColor"

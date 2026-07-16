@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useCallback, useMemo } from "react";
+import { Suspense, useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 import FirstPersonController, {
@@ -12,17 +12,39 @@ import CinematicCamera from "@/components/CinematicCamera";
 import MuseumScene from "@/scenes/MuseumScene";
 import { useSettings } from "@/settings/SettingsContext";
 import SettingsPanel from "@/components/settings/SettingsPanel";
-import SettingsButton from "@/components/settings/SettingsButton";
-import Crosshair from "@/components/settings/Crosshair";
 import FpsCounter from "@/components/settings/FpsCounter";
 import AccessibilityEffects from "@/components/settings/AccessibilityEffects";
-import type { ExhibitItem } from "@/utils/museumData";
 
-type AppState = "idle" | "cinematic" | "ready-to-explore" | "exploring";
+// New HUD system
+import HudShell from "@/components/hud/HudShell";
+import AchievementToast from "@/components/hud/AchievementToast";
+import MissionPanel from "@/components/hud/MissionPanel";
+
+import type { ExhibitItem } from "@/utils/museumData";
+import { museumData } from "@/utils/museumData";
+import InteractionManager from "@/interaction/InteractionManager";
+import DebugOverlay from "@/components/DebugOverlay";
+import DebugHelper3D from "@/components/DebugHelper3D";
+
+type AppState = "idle" | "cinematic" | "ready-to-explore" | "exploring" | "showcasing";
+
+// ─── Achievement milestones ────────────────────────────────────────────────────
+
+interface Achievement {
+  threshold: number; // % completion
+  label: string;
+}
+
+const ACHIEVEMENTS: Achievement[] = [
+  { threshold: 25,  label: "Penjelajah Pemula" },
+  { threshold: 50,  label: "Setengah Jalan!" },
+  { threshold: 75,  label: "Hampir Selesai" },
+  { threshold: 100, label: "Penjelajah Museum Sejati" },
+];
 
 /**
  * Komponen utama pengalaman museum: membungkus Canvas Three.js,
- * mengelola state popup, dan menampilkan overlay UI (crosshair, instruksi).
+ * mengelola state popup, dan menampilkan overlay UI (HudShell, AchievementToast, MissionPanel).
  *
  * State machine:
  *   idle             → Landing page overlay visible, camera at start position
@@ -32,56 +54,150 @@ type AppState = "idle" | "cinematic" | "ready-to-explore" | "exploring";
  */
 export default function MuseumExperience() {
   const { settings } = useSettings();
-  const [selected, setSelected] = useState<ExhibitItem | null>(null);
-  const [appState, setAppState] = useState<AppState>("idle");
+  const [selected, setSelected]     = useState<ExhibitItem | null>(null);
+  const [appState, setAppState]     = useState<AppState>("idle");
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const handleEnter = useCallback(() => setAppState("cinematic"), []);
-  const handleCinematicComplete = useCallback(
-    () => setAppState("ready-to-explore"),
-    []
-  );
-  const handleStartExploring = useCallback(() => setAppState("exploring"), []);
+  // ── HUD state ───────────────────────────────────────────────────────────────
+
+  const [visitedExhibits, setVisitedExhibits] = useState<Set<string>>(new Set());
+  const [isInteracting, setIsInteracting]     = useState(false);
+  const [audioMuted, setAudioMuted]           = useState(false);
+  const [missionOpen, setMissionOpen]         = useState(false);
+
+  // Achievement toast
+  const [toastVisible, setToastVisible]       = useState(false);
+  const [toastLabel, setToastLabel]           = useState("");
+  const unlockedThresholds = useRef<Set<number>>(new Set());
+
+  // ── Interaction state ───────────────────────────────────────────────────────
+
+  /**
+   * Set to `true` immediately before calling `document.exitPointerLock()` from code
+   * (e.g., when opening an exhibit panel). Prevents `handlePointerLockLost` from
+   * treating the programmatic unlock as an accidental Esc press and opening Settings.
+   * Reset to `false` inside `handlePointerLockLost` after checking.
+   */
+  const intentionalLockRelease = useRef(false);
+
+  // ── State machine handlers ─────────────────────────────────────────────────
+
+  const handleEnter       = useCallback(() => setAppState("cinematic"), []);
+  const handleCinematicComplete = useCallback(() => setAppState("ready-to-explore"), []);
+  
+  const handleStartExploring    = useCallback(() => {
+    setAppState("exploring");
+    const canvas = document.querySelector("canvas");
+    if (canvas) {
+      canvas.requestPointerLock();
+    }
+  }, []);
 
   // Membuka Settings → jeda kontrol first-person & lepas pointer lock.
-  const openSettings = useCallback(() => setSettingsOpen(true), []);
+  const openSettings  = useCallback(() => setSettingsOpen(true), []);
   const closeSettings = useCallback(() => {
     setSettingsOpen(false);
-    // Kembali ke prompt agar pengguna klik untuk mengunci pointer lagi.
     setAppState((s) => (s === "exploring" ? "ready-to-explore" : s));
   }, []);
 
-  // Pointer lock hilang selagi menjelajah (mis. tekan Esc) → buka Settings (pause).
+  // Pointer lock lost while exploring.
+  // If the loss was intentional (exhibit opened), skip — Settings should NOT open.
+  // If it was unintentional (player pressed Esc), open Settings as a pause menu.
   const handlePointerLockLost = useCallback(() => {
+    if (intentionalLockRelease.current) {
+      intentionalLockRelease.current = false; // consume the flag
+      return; // do NOT open Settings
+    }
     setSettingsOpen((open) => {
       if (!open) return true;
       return open;
     });
   }, []);
 
-  // Subset pengaturan yang relevan untuk kamera — diteruskan sebagai props
-  // karena React Context tidak menembus boundary reconciler <Canvas>.
+  const handleSelectExhibit = useCallback((item: ExhibitItem | null) => {
+    setSelected(item);
+    if (item) {
+      // Signal that this pointer lock release is intentional before calling exitPointerLock.
+      // This prevents handlePointerLockLost from treating it as an Esc press → Settings open.
+      intentionalLockRelease.current = true;
+      if (document.pointerLockElement) {
+        document.exitPointerLock();
+      } else {
+        // Lock was already released; reset flag immediately
+        intentionalLockRelease.current = false;
+      }
+      setAppState("showcasing");
+
+      setVisitedExhibits((prev) => {
+        if (prev.has(item.id)) return prev;
+        const next = new Set(prev);
+        next.add(item.id);
+
+        // Check achievements directly upon new visit
+        const total = museumData.length;
+        const visited = next.size;
+        if (total > 0) {
+          const pct = (visited / total) * 100;
+          for (const achievement of ACHIEVEMENTS) {
+            if (pct >= achievement.threshold && !unlockedThresholds.current.has(achievement.threshold)) {
+              unlockedThresholds.current.add(achievement.threshold);
+              setToastLabel(achievement.label);
+              setToastVisible(true);
+              break;
+            }
+          }
+        }
+
+        return next;
+      });
+    }
+  }, []);
+
+  // Close InfoDrawer → route directly back to exploring and re-engage pointer lock automatically.
+  const handleInfoClose = useCallback(() => {
+    setSelected(null);
+    setAppState((s) => (s === "showcasing" ? "exploring" : s));
+    const canvas = document.querySelector("canvas");
+    if (canvas) {
+      canvas.requestPointerLock();
+    }
+  }, []);
+
+  // ── M key — toggle mission panel ─────────────────────────────────────────
+
+  useEffect(() => {
+    if (appState !== "exploring") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "m" || e.key === "M") {
+        setMissionOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [appState]);
+
+  // ── Camera settings memo ──────────────────────────────────────────────────
+
   const cameraSettings = useMemo<CameraSettings>(
     () => ({
       mouseSensitivity: settings.mouseSensitivity,
       cameraSmoothness: settings.cameraSmoothness,
-      cameraFov: settings.cameraFov,
-      invertYAxis: settings.invertYAxis,
+      cameraFov:        settings.cameraFov,
+      invertYAxis:      settings.invertYAxis,
       mouseAcceleration: settings.mouseAcceleration,
-      cameraShake: settings.cameraShake,
-      walkingSpeed: settings.walkingSpeed,
-      runningSpeed: settings.runningSpeed,
-      headBobbing: settings.headBobbing,
-      reduceMotion: settings.reduceMotion,
+      cameraShake:      settings.cameraShake,
+      walkingSpeed:     settings.walkingSpeed,
+      runningSpeed:     settings.runningSpeed,
+      headBobbing:      settings.headBobbing,
+      reduceMotion:     settings.reduceMotion,
     }),
     [settings]
   );
 
-  const exploring = appState === "exploring";
+  const exploring         = appState === "exploring";
+  const showcasing        = appState === "showcasing";
+  // Movement is frozen during showcase — player is reading the panel
   const controllerEnabled = exploring && !settingsOpen;
-  const showCrosshair =
-    !settingsOpen &&
-    (controllerEnabled || (settings.alwaysCrosshair && appState !== "idle"));
 
   return (
     <div
@@ -93,12 +209,11 @@ export default function MuseumExperience() {
         background: "#000",
       }}
     >
-      {/* Efek accessibility global (high contrast, large text, color blind, dsb.) */}
+      {/* Efek accessibility global */}
       <AccessibilityEffects />
 
       <Canvas
         shadows
-        // Start camera exactly at the first cinematic waypoint to prevent teleports
         camera={{ fov: settings.cameraFov, near: 0.1, far: 100, position: [0, 12, 20] }}
         gl={{
           antialias: settings.antiAliasing,
@@ -107,60 +222,66 @@ export default function MuseumExperience() {
         onCreated={({ gl }) => {
           gl.shadowMap.type = THREE.PCFShadowMap;
         }}
+        // Block pointer events while InfoDrawer is open — prevents clicks
+        // from passing through the scrim into the R3F scene and re-triggering
+        // exhibit selection while the player is reading the panel.
+        style={{ pointerEvents: showcasing ? "none" : "auto" }}
       >
-        <color attach="background" args={["#0f172a"]} />
-        <fog attach="fog" args={["#0f172a", 15, 45]} />
+        <color attach="background" args={["#e8e8e8"]} />
+        <fog attach="fog" args={["#e8e8e8", 18, 50]} />
         <Suspense fallback={null}>
-          <MuseumScene onSelectExhibit={setSelected} />
+          <MuseumScene />
         </Suspense>
 
-        {/* Cinematic flythrough — always mounted until exploring to prevent jumps */}
-        {appState !== "exploring" && (
+        {/*
+         * CinematicCamera: only mounted during idle / cinematic / ready-to-explore.
+         * CRITICAL: must NOT be mounted during "showcasing" or "exploring".
+         * If mounted during "showcasing", component remounts (done.current resets to false)
+         * and its useEffect forcibly moves the camera back to waypoint[0] = (0, 12, 20),
+         * which is the camera composition break visible in the info panel screenshot.
+         */}
+        {(appState === "idle" || appState === "cinematic" || appState === "ready-to-explore") && (
           <CinematicCamera
             playing={appState === "cinematic"}
             onComplete={handleCinematicComplete}
           />
         )}
 
-        {/* First-person controls — active only when exploring & settings closed */}
+        {/* First-person controls */}
         <FirstPersonController
           enabled={controllerEnabled}
           settings={cameraSettings}
           onPointerLockLost={handlePointerLockLost}
         />
-      </Canvas>
 
-      {/* Crosshair — style & visibility dikendalikan pengaturan */}
-      {showCrosshair && (
-        <Crosshair
-          style={settings.crosshairStyle}
-          color={settings.highContrast ? "#ffffff" : "rgba(255,255,255,0.85)"}
+        {/* Centralized interaction: single raycaster → registered colliders only */}
+        <InteractionManager
+          enabled={controllerEnabled}
+          onInteract={handleSelectExhibit}
+          onHoverChange={setIsInteracting}
         />
-      )}
+
+        {/* 3D Debug Visualizers (Laser vector + boundary rings) */}
+        <DebugHelper3D />
+      </Canvas>
 
       {/* FPS counter */}
       {settings.showFps && appState !== "idle" && <FpsCounter />}
 
-      {/* Tombol pengaturan (gear) — tampil setelah landing */}
-      {appState !== "idle" && !settingsOpen && (
-        <SettingsButton onClick={openSettings} />
-      )}
-
-      {/* Cinematic vignette overlay during camera flythrough */}
+      {/* Cinematic vignette overlay */}
       {(appState === "cinematic" || appState === "ready-to-explore") && (
         <div
           style={{
             pointerEvents: "none",
             position: "absolute",
             inset: 0,
-            background:
-              "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.5) 100%)",
+            background: "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.5) 100%)",
             zIndex: 30,
           }}
         />
       )}
 
-      {/* Landing overlay — visible only in idle state */}
+      {/* Landing overlay */}
       {appState === "idle" && <LandingOverlay onEnter={handleEnter} />}
 
       {/* Prompt to click and engage pointer lock after cinematic */}
@@ -175,45 +296,95 @@ export default function MuseumExperience() {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            background: "rgba(0,0,0,0.3)",
+            background: "rgba(0,0,0,0.25)",
             backdropFilter: "blur(4px)",
             WebkitBackdropFilter: "blur(4px)",
             cursor: "pointer",
-            color: "white",
-            fontFamily: "system-ui, sans-serif",
           }}
         >
           <div
             style={{
-              padding: "1rem 2rem",
-              background: "rgba(255,255,255,0.1)",
-              border: "1px solid rgba(255,255,255,0.2)",
-              borderRadius: "1rem",
+              padding: "1.25rem 2rem",
+              background: "rgba(238,238,238,0.85)",
+              border: "1px solid rgba(0,0,0,0.08)",
+              borderRadius: "1.2rem",
               textAlign: "center",
+              boxShadow: "0 16px 48px rgba(0,0,0,0.18)",
               animation: "fadeIn 0.5s ease",
+              backdropFilter: "blur(16px)",
+              fontFamily: '"Inter", system-ui, sans-serif',
             }}
           >
-            <h2 style={{ fontSize: "1.5rem", margin: "0 0 0.5rem 0", fontWeight: 600 }}>
+            <h2
+              style={{
+                fontSize: "1.2rem",
+                margin: "0 0 0.4rem 0",
+                fontFamily: '"Poppins", sans-serif',
+                fontWeight: 700,
+                color: "#000",
+              }}
+            >
               Siap Menjelajah
             </h2>
-            <p style={{ margin: 0, color: "rgba(255,255,255,0.7)", fontSize: "0.9rem" }}>
+            <p style={{ margin: 0, color: "rgba(0,0,0,0.52)", fontSize: "0.88rem" }}>
               Klik layar untuk mulai dan mengunci kursor
             </p>
           </div>
-          <style dangerouslySetInnerHTML={{ __html: `
-            @keyframes fadeIn {
-              from { opacity: 0; transform: translateY(10px) scale(0.95); }
-              to { opacity: 1; transform: translateY(0) scale(1); }
-            }
-          `}} />
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
+              @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px) scale(0.95); }
+                to   { opacity: 1; transform: translateY(0) scale(1); }
+              }
+            `,
+            }}
+          />
         </div>
       )}
 
-      {/* Floating info popup for clicked exhibits */}
-      <InfoDrawer item={selected} onClose={() => setSelected(null)} />
+      {/* ── HUD Shell (exploring only — hidden while showcasing a panel) */}
+      {exploring && !settingsOpen && (
+        <HudShell
+          selected={selected}
+          visitedExhibits={visitedExhibits}
+          isInteracting={isInteracting}
+          audioMuted={audioMuted}
+          onToggleAudio={() => setAudioMuted((m) => !m)}
+          onOpenSettings={openSettings}
+        />
+      )}
 
-      {/* Settings panel (pause menu) */}
+      {/* ── Mission Panel ─────────────────────────────────────────────── */}
+      {exploring && !settingsOpen && (
+        <MissionPanel
+          visitedExhibits={visitedExhibits}
+          open={missionOpen}
+          onToggle={() => setMissionOpen((o) => !o)}
+        />
+      )}
+
+      {/* ── Achievement Toast ─────────────────────────────────────────── */}
+      <AchievementToast
+        visible={toastVisible}
+        label={toastLabel}
+        duration={4000}
+        onDismiss={() => setToastVisible(false)}
+      />
+
+      {/* ── Floating info popup for clicked exhibits ──────────────────── */}
+      <InfoDrawer
+        item={selected}
+        active={showcasing}
+        onClose={handleInfoClose}
+        onNavigate={handleSelectExhibit}
+      />
+
+      {/* ── Settings panel (pause menu) ───────────────────────────────── */}
       <SettingsPanel open={settingsOpen} onClose={closeSettings} />
+
+      {/* ── Debug HUD (toggled via F3 / tilde) ─────────────────────────── */}
+      <DebugOverlay appState={appState} settingsOpen={settingsOpen} />
     </div>
   );
 }

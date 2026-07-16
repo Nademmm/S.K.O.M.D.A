@@ -4,7 +4,6 @@ import { useEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { useKeyboardControls } from "@/hooks/useKeyboardControls";
-import { museumData } from "@/utils/museumData";
 
 const ROOM_HALF_WIDTH = 11; // batas collision sumbu X
 const ROOM_HALF_DEPTH = 13; // batas collision sumbu Z
@@ -198,8 +197,8 @@ export default function FirstPersonController({
     }
 
     // Hitung posisi kandidat berikutnya setelah bergerak
-    let nextX = camera.position.x + direction.current.x;
-    let nextZ = camera.position.z + direction.current.z;
+    const nextX = camera.position.x + direction.current.x;
+    const nextZ = camera.position.z + direction.current.z;
 
     // Collision sederhana: clamp posisi kamera di dalam batas ruangan.
     const clampedX = THREE.MathUtils.clamp(

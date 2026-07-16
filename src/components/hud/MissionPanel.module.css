@@ -1,0 +1,245 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   TelkomVerse — Mission Panel
+   Collapsible left-edge panel · Light glass · Premium museum aesthetic
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Outer container: always present, anchored left ──────────────────── */
+
+.container {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+/* ── Tab: collapsed trigger ──────────────────────────────────────────── */
+
+.tab {
+  writing-mode: vertical-lr;
+  transform: rotate(180deg);
+  background: var(--museum-glass, rgba(238,238,238,0.80));
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  border: 1px solid var(--museum-glass-border, rgba(0,0,0,0.08));
+  border-left: none;
+  border-radius: 0 10px 10px 0;
+  padding: 12px 7px;
+  cursor: pointer;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--museum-shadow-sm);
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.tab:hover {
+  background: var(--museum-glass-heavy, rgba(238,238,238,0.92));
+  border-color: rgba(203,41,87,0.30);
+}
+
+.tabDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #CB2957;
+  flex-shrink: 0;
+}
+
+.tabLabel {
+  font-family: var(--font-body, "Inter"), sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.50);
+}
+
+/* ── Panel: expanded ─────────────────────────────────────────────────── */
+
+.panel {
+  width: 280px;
+  max-height: min(70vh, 520px);
+  background: var(--museum-glass-heavy, rgba(238,238,238,0.92));
+  backdrop-filter: blur(24px) saturate(170%);
+  -webkit-backdrop-filter: blur(24px) saturate(170%);
+  border: 1px solid var(--museum-glass-border, rgba(0,0,0,0.08));
+  border-left: none;
+  border-radius: 0 16px 16px 0;
+  box-shadow: var(--museum-shadow-lg);
+  overflow: hidden;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.panelHeader {
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.panelTitle {
+  font-family: var(--font-heading, "Poppins"), sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #000;
+}
+
+.panelClose {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: rgba(0,0,0,0.35);
+  font-size: 14px;
+  font-weight: 300;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.panelClose:hover {
+  background: rgba(0,0,0,0.06);
+  color: #000;
+}
+
+.panelBody {
+  overflow-y: auto;
+  flex: 1;
+  padding: 12px 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.10) transparent;
+}
+
+/* ── Section headings ────────────────────────────────────────────────── */
+
+.sectionLabel {
+  font-family: var(--font-body, "Inter"), sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.35);
+  padding: 6px 18px 4px;
+  display: block;
+}
+
+/* ── Mission row ─────────────────────────────────────────────────────── */
+
+.missionRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 18px;
+  transition: background 120ms ease;
+}
+
+.missionRow:hover {
+  background: rgba(0,0,0,0.03);
+}
+
+.missionCheck {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1.5px solid rgba(0,0,0,0.18);
+  flex-shrink: 0;
+  margin-top: 1px;
+  display: grid;
+  place-items: center;
+  transition: background 200ms ease, border-color 200ms ease;
+}
+
+.missionCheck.done {
+  background: #CB2957;
+  border-color: #CB2957;
+}
+
+.missionCheck svg {
+  display: none;
+}
+
+.missionCheck.done svg {
+  display: block;
+}
+
+.missionText {
+  flex: 1;
+}
+
+.missionName {
+  font-family: var(--font-body, "Inter"), sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #000;
+  line-height: 1.35;
+  display: block;
+}
+
+.missionRow.completed .missionName {
+  color: rgba(0,0,0,0.38);
+  text-decoration: line-through;
+  text-decoration-color: rgba(0,0,0,0.20);
+}
+
+.missionXp {
+  font-family: var(--font-body, "Inter"), sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  color: #CB2957;
+  letter-spacing: 0.05em;
+  background: rgba(203,41,87,0.10);
+  border-radius: 4px;
+  padding: 2px 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ── Progress summary ────────────────────────────────────────────────── */
+
+.panelFooter {
+  padding: 10px 18px 14px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  flex-shrink: 0;
+}
+
+.footerLabel {
+  font-family: var(--font-body, "Inter"), sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(0,0,0,0.38);
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footerLabel strong {
+  color: #CB2957;
+  font-weight: 700;
+}
+
+.footerTrack {
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.footerFill {
+  height: 100%;
+  border-radius: 2px;
+  background: #CB2957;
+  transition: width 600ms cubic-bezier(0.16,1,0.3,1);
+}

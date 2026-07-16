@@ -1,19 +1,16 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SKOMDA Info Drawer — Museum Artifact Interface
-
-   Design: Asymmetric floating panel. Editorial typography.
-   Inspired by Apple VisionOS, MUJI editorial, Japanese museum signage,
-   Monument Valley, and Braun industrial design.
+   TelkomVerse InfoDrawer — Museum Artifact Panel
+   Light Glassmorphism · Poppins + Inter · Accent #CB2957
+   Premium museum aesthetic — calm, editorial, elegant
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* ── Scrim ───────────────────────────────────────────────────────────── */
-/* Barely-there veil. Museum remains visible behind the panel.           */
 
 .scrim {
   position: absolute;
   inset: 0;
   z-index: 45;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.08);
   opacity: 0;
   pointer-events: none;
   transition: opacity 600ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -25,46 +22,33 @@
 }
 
 /* ── Positioner ──────────────────────────────────────────────────────── */
-/* Floats right-of-center. Generous margin. Asymmetric composition.      */
 
 .positioner {
   position: absolute;
   top: 50%;
-  right: clamp(32px, 5vw, 72px);
+  right: clamp(24px, 4vw, 60px);
   z-index: 46;
-  width: min(400px, calc(100vw - 56px));
+  width: min(380px, calc(100vw - 48px));
   transform: translateY(-50%);
   pointer-events: none;
 }
 
 /* ── Panel ───────────────────────────────────────────────────────────── */
-/* Asymmetric geometry: chamfered top-right, subtle cuts at bottom.      */
-/* Layered material: translucent veil + dark reading surface + thin edge. */
 
 .panel {
-  --accent: #9a9590;
-
   position: relative;
+  background: rgba(240, 240, 240, 0.88);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 20px;
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.16),
+    0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+  overflow: hidden;
 
-  /* 7-point polygon: rect with top-right chamfer and bottom corner cuts */
-  clip-path: polygon(
-    0 0,
-    calc(100% - 28px) 0,
-    100% 28px,
-    100% 100%,
-    calc(100% - 10px) 100%,
-    0 100%,
-    0 10px
-  );
-
-  background: rgba(18, 18, 22, 0.82);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-
-  color: #e8e5e0;
-  font-family: var(--font-geist-sans), "Inter", system-ui, -apple-system,
-    sans-serif;
-
+  font-family: "Inter", var(--font-geist-sans), system-ui, sans-serif;
+  color: #000;
   pointer-events: none;
 }
 
@@ -72,28 +56,58 @@
   pointer-events: auto;
 }
 
-/* ── Inner Surface ───────────────────────────────────────────────────── */
-/* Layer 2: Darker reading surface. Slightly inset via margin for depth. */
+/* ── Image slot ──────────────────────────────────────────────────────── */
+
+.imageSlot {
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.exhibitImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Gradient placeholder when no image */
+.imagePlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.imagePlaceholderIcon {
+  width: 40px;
+  height: 40px;
+  opacity: 0.4;
+  color: rgba(0,0,0,0.5);
+}
+
+/* Image bottom fade */
+.imageSlot::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  background: linear-gradient(to bottom, transparent, rgba(240,240,240,0.88));
+  pointer-events: none;
+}
+
+/* ── Inner content area ──────────────────────────────────────────────── */
 
 .innerSurface {
-  margin: 1px;
-  margin-right: 0; /* Align with chamfer edge */
-  background: rgba(10, 10, 14, 0.45);
-  padding: 44px 42px 40px 44px;
-
-  clip-path: polygon(
-    0 0,
-    calc(100% - 27px) 0,
-    100% 27px,
-    100% 100%,
-    calc(100% - 9px) 100%,
-    0 100%,
-    0 9px
-  );
-
+  padding: 20px 24px 24px;
   display: flex;
   flex-direction: column;
-  max-height: min(72vh, 580px);
+  max-height: min(60vh, 440px);
 }
 
 /* ── Top Row ─────────────────────────────────────────────────────────── */
@@ -102,74 +116,77 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 40px;
+  margin-bottom: 14px;
 }
 
 /* ── Category Label ──────────────────────────────────────────────────── */
-/* Small-caps. Generous tracking. Like Japanese museum signage.          */
 
 .categoryLabel {
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.22em;
+  font-family: "Inter", sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(232, 229, 224, 0.38);
+  color: rgba(0, 0, 0, 0.38);
   line-height: 1;
-  padding-top: 2px;
+  padding-top: 3px;
+  background: rgba(0,0,0,0.05);
+  border-radius: 5px;
+  padding: 4px 8px;
 }
 
 /* ── Close Glyph ─────────────────────────────────────────────────────── */
-/* Two hairlines crossing. Almost invisible until hovered.               */
 
 .closeGlyph {
   display: grid;
   place-items: center;
   width: 28px;
   height: 28px;
-  background: none;
+  background: rgba(0, 0, 0, 0.06);
   border: none;
+  border-radius: 8px;
   cursor: pointer;
-  color: rgba(232, 229, 224, 0.14);
-  font-family: var(--font-geist-sans), "Inter", system-ui, sans-serif;
-  font-size: 13px;
-  font-weight: 200;
+  color: rgba(0, 0, 0, 0.38);
+  font-family: "Inter", sans-serif;
+  font-size: 16px;
+  font-weight: 300;
   line-height: 1;
   padding: 0;
-  transition: color 400ms ease;
+  transition: background 200ms ease, color 200ms ease;
   flex-shrink: 0;
 }
 
 .closeGlyph:hover {
-  color: rgba(232, 229, 224, 0.55);
+  background: rgba(203, 41, 87, 0.12);
+  color: #CB2957;
 }
 
 .closeGlyph:focus-visible {
-  outline: 1px solid rgba(232, 229, 224, 0.3);
-  outline-offset: 4px;
+  outline: 2px solid rgba(203, 41, 87, 0.5);
+  outline-offset: 2px;
 }
 
 /* ── Title ───────────────────────────────────────────────────────────── */
-/* Editorial. Large. Tight tracking. The hero of the composition.        */
 
 .title {
-  margin: 0;
-  font-size: clamp(24px, 3.5vw, 30px);
-  font-weight: 600;
-  line-height: 1.12;
-  letter-spacing: -0.025em;
-  color: #f0ede8;
+  margin: 0 0 6px;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(20px, 3vw, 24px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: #000;
 }
 
 /* ── Accent Line ─────────────────────────────────────────────────────── */
-/* Hairline rule. Only place the accent color appears.                  */
 
 .accentLine {
-  width: 28px;
-  height: 1px;
-  background: var(--accent);
-  opacity: 0.45;
-  margin: 32px 0;
+  width: 32px;
+  height: 2px;
+  background: #CB2957;
   border: none;
+  border-radius: 1px;
+  margin: 14px 0 16px;
 }
 
 /* ── Content Area ────────────────────────────────────────────────────── */
@@ -179,98 +196,189 @@
   flex: 1;
   min-height: 0;
   scrollbar-width: thin;
-  scrollbar-color: rgba(232, 229, 224, 0.06) transparent;
+  scrollbar-color: rgba(0, 0, 0, 0.10) transparent;
 }
 
 .contentArea::-webkit-scrollbar {
-  width: 2px;
+  width: 3px;
 }
 
 .contentArea::-webkit-scrollbar-thumb {
-  background: rgba(232, 229, 224, 0.08);
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 2px;
 }
 
 /* ── Pull Quote ──────────────────────────────────────────────────────── */
-/* Italic. Comfortable size. A moment of emphasis in the composition.   */
 
 .pullQuote {
-  margin: 0 0 32px;
-  font-size: 15px;
+  margin: 0 0 16px;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
   font-style: italic;
-  font-weight: 400;
-  line-height: 1.6;
-  color: rgba(240, 237, 232, 0.78);
+  font-weight: 500;
+  line-height: 1.55;
+  color: rgba(0, 0, 0, 0.65);
   letter-spacing: 0.005em;
+  border-left: 2px solid rgba(203, 41, 87, 0.40);
+  padding-left: 12px;
 }
 
 /* ── Body Text ───────────────────────────────────────────────────────── */
-/* Comfortable measure. Quiet color. Readable. Unhurried.               */
 
 .bodyText {
-  margin: 0;
-  font-size: 13.5px;
+  margin: 0 0 18px;
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
   font-weight: 400;
-  line-height: 1.75;
-  color: rgba(232, 229, 224, 0.52);
-  max-width: 52ch;
+  line-height: 1.72;
+  color: rgba(0, 0, 0, 0.58);
 }
 
-/* ── Action ──────────────────────────────────────────────────────────── */
-/* Visible. Accessible. Still integrated — not a loud CTA button.        */
+/* ── Facts Section ───────────────────────────────────────────────────── */
+
+.factsSection {
+  margin-bottom: 4px;
+}
+
+.factsTitle {
+  font-family: "Inter", sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.35);
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.factsTitle::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(0,0,0,0.08);
+}
+
+.factsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.factItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-family: "Inter", sans-serif;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.factDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #CB2957;
+  opacity: 0.7;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+/* ── Navigation: Prev / Next / Close ────────────────────────────────── */
+
+.navRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0,0,0,0.07);
+}
+
+.navBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 9px;
+  padding: 7px 12px;
+  cursor: pointer;
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(0,0,0,0.55);
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.navBtn:hover {
+  background: rgba(203,41,87,0.08);
+  border-color: rgba(203,41,87,0.25);
+  color: #CB2957;
+}
+
+.navBtn:disabled {
+  opacity: 0.28;
+  cursor: not-allowed;
+}
+
+.navBtn:disabled:hover {
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.08);
+  color: rgba(0,0,0,0.55);
+}
+
+.navSpacer {
+  flex: 1;
+}
+
+/* ── Action / Close ──────────────────────────────────────────────────── */
 
 .actionText {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 7px;
   background: none;
   border: none;
-  padding: 10px 0;
+  padding: 7px 0;
   cursor: pointer;
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.16em;
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--accent);
-  border-bottom: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
-  transition:
-    color 350ms ease,
-    border-color 350ms ease,
-    letter-spacing 500ms cubic-bezier(0.16, 1, 0.3, 1),
-    gap 500ms cubic-bezier(0.16, 1, 0.3, 1),
-    filter 350ms ease;
-  filter: brightness(1);
+  color: rgba(0,0,0,0.35);
+  transition: color 200ms ease;
 }
 
 .actionText:hover {
-  color: var(--accent);
-  border-color: var(--accent);
-  letter-spacing: 0.22em;
-  gap: 14px;
-  filter: brightness(1.25);
+  color: rgba(0,0,0,0.65);
 }
 
-.actionText:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 6px;
-  border-radius: 2px;
-}
-
-/* Arrow indicator — subtle directional cue */
 .actionArrow {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 300;
-  line-height: 1;
-  transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 300ms ease;
 }
 
 .actionText:hover .actionArrow {
   transform: translateX(3px);
 }
 
+.actionText:focus-visible {
+  outline: 2px solid rgba(203,41,87,0.5);
+  outline-offset: 4px;
+  border-radius: 3px;
+}
+
 /* ── Responsive ──────────────────────────────────────────────────────── */
 
-@media (max-width: 540px) {
+@media (max-width: 480px) {
   .positioner {
     right: 12px;
     left: 12px;
@@ -279,22 +387,14 @@
   }
 
   .innerSurface {
-    padding: 32px 26px 28px 28px;
+    padding: 16px 18px 18px;
   }
 
-  .topRow {
-    margin-bottom: 28px;
-  }
-
-  .accentLine {
-    margin: 24px 0;
-  }
-
-  .pullQuote {
-    margin-bottom: 24px;
+  .imageSlot {
+    height: 120px;
   }
 
   .title {
-    font-size: 22px;
+    font-size: 20px;
   }
 }

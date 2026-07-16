@@ -2,29 +2,85 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { CATEGORY_LABEL, type ExhibitItem } from "@/utils/museumData";
+import {
+  CATEGORY_LABEL,
+  getPrevExhibit,
+  getNextExhibit,
+  type ExhibitItem,
+} from "@/utils/museumData";
 import styles from "./InfoDrawer.module.css";
+
+// ─── Props ────────────────────────────────────────────────────────────────────
 
 interface InfoDrawerProps {
   /** Selected exhibit; null means the drawer is closed */
   item: ExhibitItem | null;
+  /** True when the drawer is in "showcasing" state — enables Escape-to-close. */
+  active?: boolean;
   onClose: () => void;
+  /** Navigate to a specific exhibit from within the panel */
+  onNavigate?: (item: ExhibitItem) => void;
 }
 
 const FOCUSABLE_SELECTOR =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
+// ─── Image Placeholder ────────────────────────────────────────────────────────
+
+function ImagePlaceholder({ color }: { color: string }) {
+  return (
+    <div
+      className={styles.imagePlaceholder}
+      style={{
+        background: `linear-gradient(135deg, ${color}22 0%, ${color}44 50%, ${color}18 100%)`,
+      }}
+    >
+      <svg
+        className={styles.imagePlaceholderIcon}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        aria-hidden="true"
+      >
+        <rect x="3" y="3" width="18" height="18" rx="3" />
+        <circle cx="8.5" cy="8.5" r="1.5" />
+        <polyline points="21 15 16 10 5 21" />
+      </svg>
+    </div>
+  );
+}
+
+// ─── Nav Arrow ────────────────────────────────────────────────────────────────
+
+function ArrowLeft() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d="M7.5 2L3.5 6L7.5 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function ArrowRight() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d="M4.5 2L8.5 6L4.5 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
 /**
- * Museum artifact information panel.
+ * Museum artifact information panel — light glassmorphism edition.
  *
- * A floating asymmetric surface that emerges from the environment.
- * Information is discovered, not displayed. Typography is the hero.
+ * A floating panel that emerges on the right side of the screen.
+ * Shows: category tag, title, image, accent line, pull quote, body description,
+ * interesting facts, and prev/next navigation within the same category.
  *
- * Motion: slow, calm, confident — like an object gently settling into space.
- * Surface: layered materials with editorial rhythm.
- * Accent: appears only at the hairline rule. Restrained.
+ * Motion: calm, confident — like a museum placard gently settling into view.
  */
-export default function InfoDrawer({ item, onClose }: InfoDrawerProps) {
+export default function InfoDrawer({ item, active = false, onClose, onNavigate }: InfoDrawerProps) {
   const open = item !== null;
   const [displayItem, setDisplayItem] = useState<ExhibitItem | null>(item);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -46,20 +102,21 @@ export default function InfoDrawer({ item, onClose }: InfoDrawerProps) {
     };
   }, [item]);
 
-  // Escape key closes drawer
+  // Escape key closes drawer — but ONLY when this panel is the active
+  // focus (showcasing state). While exploring, Escape belongs to pointer lock
+  // release / settings open, handled by the parent.
   useEffect(() => {
-    if (!open) return;
+    if (!open || !active) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  }, [open, active, onClose]);
 
-  // Focus management: trap focus inside dialog, restore on close
+  // Focus management
   useEffect(() => {
     if (!open || !dialogRef.current) return;
-
     const previouslyFocused = document.activeElement as HTMLElement | null;
     closeBtnRef.current?.focus();
 
@@ -68,10 +125,8 @@ export default function InfoDrawer({ item, onClose }: InfoDrawerProps) {
       if (e.key !== "Tab") return;
       const focusable = dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
       if (focusable.length === 0) return;
-
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
-
       if (e.shiftKey && document.activeElement === first) {
         e.preventDefault();
         last.focus();
@@ -80,7 +135,6 @@ export default function InfoDrawer({ item, onClose }: InfoDrawerProps) {
         first.focus();
       }
     };
-
     dialog.addEventListener("keydown", onKeyDown);
     return () => {
       dialog.removeEventListener("keydown", onKeyDown);
@@ -88,18 +142,27 @@ export default function InfoDrawer({ item, onClose }: InfoDrawerProps) {
     };
   }, [open]);
 
-  const accent = displayItem?.color ?? "#9a9590";
+  const prevExhibit = displayItem ? getPrevExhibit(displayItem) : null;
+  const nextExhibit = displayItem ? getNextExhibit(displayItem) : null;
+
+  const handlePrev = () => {
+    if (prevExhibit && onNavigate) onNavigate(prevExhibit);
+  };
+
+  const handleNext = () => {
+    if (nextExhibit && onNavigate) onNavigate(nextExhibit);
+  };
 
   return (
     <>
-      {/* Scrim — barely-there veil; museum remains visible */}
+      {/* Scrim — barely-there veil */}
       <div
         onClick={onClose}
         aria-hidden={!open}
         className={`${styles.scrim} ${open ? styles.scrimOpen : ""}`}
       />
 
-      {/* Floating composition */}
+      {/* Floating panel */}
       <div className={styles.positioner}>
         <AnimatePresence>
           {open && displayItem && (
@@ -109,19 +172,28 @@ export default function InfoDrawer({ item, onClose }: InfoDrawerProps) {
               aria-modal="true"
               aria-labelledby={titleId}
               className={`${styles.panel} ${styles.panelOpen}`}
-              style={{ "--accent": accent } as React.CSSProperties}
-              // Motion: opacity + subtle translation + tiny scale. No bounce.
-              initial={{ opacity: 0, y: 14, scale: 0.975 }}
+              initial={{ opacity: 0, y: 16, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 8, scale: 0.985 }}
-              transition={{
-                duration: 0.72,
-                ease: [0.16, 1, 0.3, 1],
-              }}
+              exit={{ opacity: 0, y: 10, scale: 0.98 }}
+              transition={{ duration: 0.68, ease: [0.16, 1, 0.3, 1] }}
             >
-              {/* Layer 2: Darker reading surface, slightly inset */}
+              {/* Image slot */}
+              <div className={styles.imageSlot}>
+                {displayItem.imageUrl ? (
+                  <img
+                    src={displayItem.imageUrl}
+                    alt={displayItem.title}
+                    className={styles.exhibitImage}
+                    loading="lazy"
+                  />
+                ) : (
+                  <ImagePlaceholder color={displayItem.color} />
+                )}
+              </div>
+
+              {/* Content */}
               <div className={styles.innerSurface}>
-                {/* Top row: category + close glyph */}
+                {/* Top row: category tag + close */}
                 <div className={styles.topRow}>
                   <span className={styles.categoryLabel}>
                     {CATEGORY_LABEL[displayItem.category]}
@@ -130,47 +202,79 @@ export default function InfoDrawer({ item, onClose }: InfoDrawerProps) {
                     ref={closeBtnRef}
                     type="button"
                     onClick={onClose}
-                    aria-label="Close"
+                    aria-label="Tutup panel"
                     className={styles.closeGlyph}
                   >
-                    <span aria-hidden="true" style={{ fontWeight: 100, fontSize: 15, lineHeight: 1 }}>
-                      ×
-                    </span>
+                    <span aria-hidden="true">×</span>
                   </button>
                 </div>
 
-                {/* Title — the hero of the composition */}
+                {/* Title */}
                 <h2 id={titleId} className={styles.title}>
                   {displayItem.title}
                 </h2>
 
-                {/* Hairline rule — the only place accent color appears */}
-                <div
-                  className={styles.accentLine}
-                  aria-hidden="true"
-                  style={{ background: accent }}
-                />
+                {/* Accent hairline */}
+                <div className={styles.accentLine} aria-hidden="true" />
 
-                {/* Scrollable content: quote + description */}
+                {/* Scrollable content */}
                 <div className={styles.contentArea}>
-                  <p className={styles.pullQuote}>
-                    &ldquo;{displayItem.highlight}&rdquo;
-                  </p>
+                  {/* Pull quote */}
+                  <p className={styles.pullQuote}>&ldquo;{displayItem.highlight}&rdquo;</p>
+
+                  {/* Body */}
                   <p className={styles.bodyText}>{displayItem.description}</p>
+
+                  {/* Facts */}
+                  {displayItem.facts && displayItem.facts.length > 0 && (
+                    <div className={styles.factsSection}>
+                      <p className={styles.factsTitle}>Fakta Menarik</p>
+                      <ul className={styles.factsList}>
+                        {displayItem.facts.map((fact, i) => (
+                          <li key={i} className={styles.factItem}>
+                            <span className={styles.factDot} aria-hidden="true" />
+                            {fact}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
 
-                {/* Action — visible, accessible, still integrated */}
-                <div style={{ marginTop: "auto", paddingTop: 36 }}>
+                {/* Navigation row */}
+                <div className={styles.navRow}>
+                  <button
+                    type="button"
+                    className={styles.navBtn}
+                    onClick={handlePrev}
+                    disabled={!prevExhibit}
+                    aria-label="Pameran sebelumnya"
+                  >
+                    <ArrowLeft />
+                    Sebelumnya
+                  </button>
+
+                  <button
+                    type="button"
+                    className={styles.navBtn}
+                    onClick={handleNext}
+                    disabled={!nextExhibit}
+                    aria-label="Pameran berikutnya"
+                  >
+                    Berikutnya
+                    <ArrowRight />
+                  </button>
+
+                  <span className={styles.navSpacer} />
+
                   <button
                     type="button"
                     onClick={onClose}
                     className={styles.actionText}
-                    aria-label="Close panel and return to exploring the museum"
+                    aria-label="Tutup panel dan kembali menjelajah"
                   >
-                    Kembali Menjelajah
-                    <span className={styles.actionArrow} aria-hidden="true">
-                      →
-                    </span>
+                    Tutup
+                    <span className={styles.actionArrow} aria-hidden="true">→</span>
                   </button>
                 </div>
               </div>

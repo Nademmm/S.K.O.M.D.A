@@ -26,9 +26,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable}`}
+      style={{ height: "100%", overflow: "hidden" }}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body style={{ height: "100%", margin: 0, padding: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+        {children}
+      </body>
     </html>
   );
 }
