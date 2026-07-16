@@ -281,24 +281,7 @@ export default function MuseumScene() {
         />
       </mesh>
 
-      {/* Red horizontal accent bar — mid-height divider */}
-      <mesh position={[0, 2.3, -ROOM_DEPTH / 2 + 0.21]}>
-        <boxGeometry args={[12.4, 0.07, 0.025]} />
-        <meshStandardMaterial
-          color="#CB2957"
-          emissive="#CB2957"
-          emissiveIntensity={1.2}
-          toneMapped={false}
-        />
-      </mesh>
 
-      {/* Vertical black aluminum trims on back wall */}
-      {[-7.3, -3.7, 0, 3.7, 7.3].map((x, i) => (
-        <mesh key={`bwtrim-${i}`} position={[x, ROOM_HEIGHT / 2, -ROOM_DEPTH / 2 + 0.22]} userData={{ obstacle: true }}>
-          <boxGeometry args={[0.055, ROOM_HEIGHT + 0.1, 0.035]} />
-          <meshStandardMaterial color="#101010" roughness={0.38} metalness={0.72} />
-        </mesh>
-      ))}
 
       {/* Black flanking edge panels */}
       <mesh position={[-10.6, ROOM_HEIGHT / 2, -ROOM_DEPTH / 2 + 0.07]} userData={{ obstacle: true }}>
