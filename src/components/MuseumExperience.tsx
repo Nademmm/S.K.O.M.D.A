@@ -10,6 +10,7 @@ import FirstPersonController, {
 import InfoDrawer from "@/components/InfoDrawer";
 import LandingOverlay from "@/components/LandingOverlay";
 import CinematicCamera from "@/components/CinematicCamera";
+import { ambientAudio } from "@/utils/audioSynth";
 import MuseumScene from "@/scenes/MuseumScene";
 import { useSettings } from "@/settings/SettingsContext";
 import SettingsPanel from "@/components/settings/SettingsPanel";
@@ -83,8 +84,19 @@ export default function MuseumExperience() {
 
   // ── State machine handlers ─────────────────────────────────────────────────
 
-  const handleEnter       = useCallback(() => setAppState("cinematic"), []);
-  const handleCinematicComplete = useCallback(() => setAppState("ready-to-explore"), []);
+  const handleEnter = useCallback(() => {
+    setAppState("cinematic");
+    ambientAudio.start();
+    ambientAudio.setMute(audioMuted);
+  }, [audioMuted]);
+
+  const handleCinematicComplete = useCallback(() => {
+    setAppState("exploring");
+    const canvas = document.querySelector("canvas");
+    if (canvas) {
+      canvas.requestPointerLock();
+    }
+  }, []);
   
   const handleStartExploring    = useCallback(() => {
     setAppState("exploring");
@@ -176,6 +188,18 @@ export default function MuseumExperience() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [appState]);
+
+  // Sync synthesized ambient audio with user mute controls
+  useEffect(() => {
+    ambientAudio.setMute(audioMuted);
+  }, [audioMuted]);
+
+  // Clean up audio on unmount
+  useEffect(() => {
+    return () => {
+      ambientAudio.stop();
+    };
+  }, []);
 
   // ── Camera settings memo ──────────────────────────────────────────────────
 

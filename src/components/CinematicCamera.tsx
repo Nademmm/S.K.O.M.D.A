@@ -1,91 +1,54 @@
 "use client";
 
-import { useRef, useCallback, useEffect, useMemo } from "react";
+import { useRef, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
 interface CinematicCameraProps {
-  /** If true, the camera flies through the path. If false, it holds the start position. */
+  /** If true, the camera dollies forward. If false, it holds the start position outside. */
   playing: boolean;
-  /** Called once the flythrough finishes. */
+  /** Called once the dolly finishes. */
   onComplete: () => void;
 }
 
-/** Total duration of the cinematic sweep in seconds. */
-const DURATION = 4.5;
-
-const WAYPOINTS = [
-  new THREE.Vector3(0, 12, 20),
-  new THREE.Vector3(10, 8, 10),
-  new THREE.Vector3(8, 5, -2),
-  new THREE.Vector3(2, 3, 2),
-  new THREE.Vector3(0, 1.6, 8), // Final position = first-person spawn point
-];
-
-const LOOK_AT_TARGETS = [
-  new THREE.Vector3(0, 2, 0),
-  new THREE.Vector3(0, 1, 0),
-  new THREE.Vector3(0, 2, -4),
-  new THREE.Vector3(0, 1.6, -3),
-  new THREE.Vector3(0, 1.6, 0),
-];
+const START_POS = new THREE.Vector3(0, 1.6, 12.5);
+const END_POS = new THREE.Vector3(0, 1.6, 8.0);
+const TARGET = new THREE.Vector3(0, 1.6, 0);
+const DOLLY_DURATION = 0.85; // 850ms, within the 700-1000ms target
 
 /**
- * Smooth-step easing (ease-in-out cubic).
- */
-function smoothStep(t: number): number {
-  return t * t * (3 - 2 * t);
-}
-
-/**
- * CinematicCamera — animated flythrough that sweeps above and around
- * the museum, then descends to the player's eye level using smooth CatmullRom splines.
+ * CinematicCamera handles the entry camera transitions:
+ * - While idle, it holds the camera outside the museum entrance.
+ * - When playing is triggered, it dollies the camera forward to the first-person spawn point.
  */
 export default function CinematicCamera({ playing, onComplete }: CinematicCameraProps) {
   const { camera } = useThree();
   const elapsed = useRef(0);
   const done = useRef(false);
-  const tmpPos = useRef(new THREE.Vector3());
-  const tmpLook = useRef(new THREE.Vector3());
 
-  // Create smooth spline curves for position and lookAt
-  const positionCurve = useMemo(() => new THREE.CatmullRomCurve3(WAYPOINTS, false, 'centripetal'), []);
-  const lookAtCurve = useMemo(() => new THREE.CatmullRomCurve3(LOOK_AT_TARGETS, false, 'centripetal'), []);
-
-  const finish = useCallback(() => {
-    if (!done.current) {
-      done.current = true;
-      onComplete();
-    }
-  }, [onComplete]);
-
-  // Handle the idle state (when mounted but playing is false)
-  // Ensure the camera starts exactly at the first waypoint to prevent teleports
+  // Hold at start position when not playing
   useEffect(() => {
     if (!playing && !done.current) {
-      positionCurve.getPoint(0, tmpPos.current);
-      lookAtCurve.getPoint(0, tmpLook.current);
-      camera.position.copy(tmpPos.current);
-      camera.lookAt(tmpLook.current);
+      camera.position.copy(START_POS);
+      camera.lookAt(TARGET);
     }
-  }, [playing, camera, positionCurve, lookAtCurve]);
+  }, [playing, camera]);
 
   useFrame((_, delta) => {
     if (!playing || done.current) return;
 
     elapsed.current += delta;
-    const norm = Math.min(elapsed.current / DURATION, 1);
-    const eased = smoothStep(norm);
+    const progress = Math.min(elapsed.current / DOLLY_DURATION, 1);
+    
+    // Smooth ease-out cubic
+    const eased = 1 - Math.pow(1 - progress, 3);
 
-    // Sample the splines at the eased time
-    positionCurve.getPoint(eased, tmpPos.current);
-    lookAtCurve.getPoint(eased, tmpLook.current);
+    camera.position.lerpVectors(START_POS, END_POS, eased);
+    camera.lookAt(TARGET);
 
-    camera.position.copy(tmpPos.current);
-    camera.lookAt(tmpLook.current);
-
-    if (norm >= 1) {
-      finish();
+    if (progress >= 1) {
+      done.current = true;
+      onComplete();
     }
   });
 
