@@ -283,16 +283,6 @@ export default function MuseumScene() {
 
 
 
-      {/* Black flanking edge panels */}
-      <mesh position={[-10.6, ROOM_HEIGHT / 2, -ROOM_DEPTH / 2 + 0.07]} userData={{ obstacle: true }}>
-        <boxGeometry args={[3.2, ROOM_HEIGHT - 0.5, 0.08]} />
-        <meshStandardMaterial color="#181818" roughness={0.92} />
-      </mesh>
-      <mesh position={[10.6, ROOM_HEIGHT / 2, -ROOM_DEPTH / 2 + 0.07]} userData={{ obstacle: true }}>
-        <boxGeometry args={[3.2, ROOM_HEIGHT - 0.5, 0.08]} />
-        <meshStandardMaterial color="#181818" roughness={0.92} />
-      </mesh>
-
       {/* ── Back Wall Branding Typography ── */}
       <Suspense fallback={null}>
         {/* Main school name — monumental */}
@@ -377,60 +367,10 @@ export default function MuseumScene() {
       {/* White concrete base */}
       <mesh position={[0, ROOM_HEIGHT / 2, ROOM_DEPTH / 2]} rotation={[0, Math.PI, 0]} receiveShadow userData={{ obstacle: true }}>
         <planeGeometry args={[ROOM_WIDTH, ROOM_HEIGHT]} />
-        <meshStandardMaterial color="#ebebeb" roughness={0.88} />
+        <meshStandardMaterial color="#000000" roughness={0.88} />
       </mesh>
 
-      {/* ── Backlit Slatted Oak Screen — front-left entry feature
-           Replaces the raw red panel with architectural warmth.
-           Structure: dark backing board → soft red glow panel → oak wood slats */}
-      <group position={[-8.5, 0, ROOM_DEPTH / 2 - 0.06]} rotation={[0, Math.PI, 0]}>
-        {/* Backing board — dark charcoal */}
-        <mesh position={[0, ROOM_HEIGHT / 2, 0]} castShadow userData={{ obstacle: true }}>
-          <boxGeometry args={[5.8, ROOM_HEIGHT, 0.04]} />
-          <meshStandardMaterial color="#111111" roughness={0.92} />
-        </mesh>
-
-        {/* Soft red backlight glow panel (sits between board and slats) */}
-        <mesh position={[0, ROOM_HEIGHT / 2 - 0.3, -0.01]}>
-          <boxGeometry args={[5.6, ROOM_HEIGHT - 1.0, 0.008]} />
-          <meshStandardMaterial
-            color="#CB2957"
-            emissive="#CB2957"
-            emissiveIntensity={1.2}
-            toneMapped={false}
-          />
-        </mesh>
-
-        {/* Warm point light behind slats */}
-        <pointLight position={[0, ROOM_HEIGHT / 2, -0.15]} intensity={3.5} distance={4.5} color="#CB2957" />
-
-        {/* Oak wood slats — 18 vertical strips evenly spaced across 5.6 units */}
-        {Array.from({ length: 18 }, (_, si) => {
-          const x = -2.66 + si * 0.333;
-          return (
-            <mesh key={`slat-${si}`} position={[x, ROOM_HEIGHT / 2, -0.06]} castShadow>
-              <boxGeometry args={[0.21, ROOM_HEIGHT - 0.6, 0.055]} />
-              <meshStandardMaterial
-                color={si % 2 === 0 ? "#a8845e" : "#9a7652"}
-                roughness={0.62}
-                metalness={0.04}
-              />
-            </mesh>
-          );
-        })}
-
-        {/* Top trim bar — black aluminium */}
-        <mesh position={[0, ROOM_HEIGHT - 0.15, -0.08]}>
-          <boxGeometry args={[5.8, 0.08, 0.07]} />
-          <meshStandardMaterial color="#141414" roughness={0.4} metalness={0.7} />
-        </mesh>
-
-        {/* Base trim bar — black aluminium */}
-        <mesh position={[0, 0.12, -0.08]}>
-          <boxGeometry args={[5.8, 0.08, 0.07]} />
-          <meshStandardMaterial color="#141414" roughness={0.4} metalness={0.7} />
-        </mesh>
-      </group>
+      {/* Slatted oak screen removed per user request */}
 
       {/* Red LED baseboard strip on front wall */}
       <mesh position={[0, 0.05, ROOM_DEPTH / 2 - 0.05]}>
@@ -467,7 +407,7 @@ export default function MuseumScene() {
           LEFT SIDE WALL — Dark base + Architectural Zone Panels
           ═══════════════════════════════════════════════════════ */}
 
-      {/* Dark base wall */}
+      {/* Side wall — warm white concrete, matching original */}
       <mesh
         position={[-ROOM_WIDTH / 2, ROOM_HEIGHT / 2, 0]}
         rotation={[0, Math.PI / 2, 0]}
@@ -475,7 +415,7 @@ export default function MuseumScene() {
         userData={{ obstacle: true }}
       >
         <planeGeometry args={[ROOM_DEPTH, ROOM_HEIGHT]} />
-        <meshStandardMaterial color="#191716" roughness={0.95} />
+        <meshStandardMaterial color="#eeeeee" roughness={0.88} />
       </mesh>
 
       {/* Left wall zone labels — museum gallery style, text directly on wall */}
@@ -502,32 +442,26 @@ export default function MuseumScene() {
         ))}
       </Suspense>
 
-      {/* Vertical trim columns between left zones — with thin red LED inset */}
+      {/* Thin decorative divider lines between left zones */}
       {[-12.5, -7.5, -2.5, 2.5, 7.5, 12.5].map((z, i) => (
-        <group key={`ltrim-${i}`} position={[-ROOM_WIDTH / 2 + 0.18, ROOM_HEIGHT / 2, z]}>
-          {/* Brushed black column */}
-          <mesh castShadow>
-            <boxGeometry args={[0.04, ROOM_HEIGHT, 0.04]} />
-            <meshStandardMaterial color="#161616" roughness={0.35} metalness={0.82} />
-          </mesh>
-          {/* Hairline red LED channel */}
-          <mesh position={[0.022, 0, 0]}>
-            <boxGeometry args={[0.006, ROOM_HEIGHT - 0.6, 0.006]} />
-            <meshStandardMaterial
-              color="#CB2957"
-              emissive="#CB2957"
-              emissiveIntensity={1.4}
-              toneMapped={false}
-            />
-          </mesh>
-        </group>
+        <mesh key={`ltrim-${i}`} position={[-ROOM_WIDTH / 2 + 0.02, ROOM_HEIGHT / 2, z]}>
+          <boxGeometry args={[0.02, ROOM_HEIGHT * 0.7, 0.004]} />
+          <meshStandardMaterial
+            color="#CB2957"
+            emissive="#CB2957"
+            emissiveIntensity={0.8}
+            toneMapped={false}
+            transparent
+            opacity={0.6}
+          />
+        </mesh>
       ))}
 
       {/* ═══════════════════════════════════════════════════════
           RIGHT SIDE WALL — Dark base + Architectural Zone Panels
           ═══════════════════════════════════════════════════════ */}
 
-      {/* Dark base wall */}
+      {/* Side wall — warm white concrete, matching original */}
       <mesh
         position={[ROOM_WIDTH / 2, ROOM_HEIGHT / 2, 0]}
         rotation={[0, -Math.PI / 2, 0]}
@@ -535,7 +469,7 @@ export default function MuseumScene() {
         userData={{ obstacle: true }}
       >
         <planeGeometry args={[ROOM_DEPTH, ROOM_HEIGHT]} />
-        <meshStandardMaterial color="#191716" roughness={0.95} />
+        <meshStandardMaterial color="#eeeeee" roughness={0.88} />
       </mesh>
 
       {/* Right wall zone labels — museum gallery style, text directly on wall */}
@@ -562,25 +496,19 @@ export default function MuseumScene() {
         ))}
       </Suspense>
 
-      {/* Vertical trim columns between right zones — with thin red LED inset */}
+      {/* Thin decorative divider lines between right zones */}
       {[-12.5, -7.5, -2.5, 2.5, 7.5, 12.5].map((z, i) => (
-        <group key={`rtrim-${i}`} position={[ROOM_WIDTH / 2 - 0.18, ROOM_HEIGHT / 2, z]}>
-          {/* Brushed black column */}
-          <mesh castShadow>
-            <boxGeometry args={[0.04, ROOM_HEIGHT, 0.04]} />
-            <meshStandardMaterial color="#161616" roughness={0.35} metalness={0.82} />
-          </mesh>
-          {/* Hairline red LED channel */}
-          <mesh position={[-0.022, 0, 0]}>
-            <boxGeometry args={[0.006, ROOM_HEIGHT - 0.6, 0.006]} />
-            <meshStandardMaterial
-              color="#CB2957"
-              emissive="#CB2957"
-              emissiveIntensity={1.4}
-              toneMapped={false}
-            />
-          </mesh>
-        </group>
+        <mesh key={`rtrim-${i}`} position={[ROOM_WIDTH / 2 - 0.02, ROOM_HEIGHT / 2, z]}>
+          <boxGeometry args={[0.02, ROOM_HEIGHT * 0.7, 0.004]} />
+          <meshStandardMaterial
+            color="#CB2957"
+            emissive="#CB2957"
+            emissiveIntensity={0.8}
+            toneMapped={false}
+            transparent
+            opacity={0.6}
+          />
+        </mesh>
       ))}
 
       {/* ═══════════════════════════════════════════════════════
