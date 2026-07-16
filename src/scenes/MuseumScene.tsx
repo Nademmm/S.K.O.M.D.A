@@ -372,7 +372,7 @@ export default function MuseumScene() {
         <Suspense fallback={null}>
           {/* 2019 */}
           <Text
-            position={[0.1, 0.52, 0.08]}
+            position={[-0.9, 0.52, 0.08]}
             fontSize={0.10}
             color="#CB2957"
             anchorX="left"
@@ -381,18 +381,18 @@ export default function MuseumScene() {
             2019
           </Text>
           <Text
-            position={[0.1, 0.38, 0.08]}
+            position={[-0.9, 0.38, 0.08]}
             fontSize={0.085}
             color="#000000"
             anchorX="left"
             anchorY="middle"
-            maxWidth={2.1}
+            maxWidth={2.3}
           >
             SMK Telkom Sidoarjo didirikan untuk memenuhi kebutuhan talenta digital di Jawa Timur.
           </Text>
           {/* 2021 */}
           <Text
-            position={[0.1, 0.02, 0.08]}
+            position={[-0.9, 0.02, 0.08]}
             fontSize={0.10}
             color="#CB2957"
             anchorX="left"
@@ -401,18 +401,18 @@ export default function MuseumScene() {
             2021
           </Text>
           <Text
-            position={[0.1, -0.12, 0.08]}
+            position={[-0.9, -0.12, 0.08]}
             fontSize={0.085}
             color="#000000"
             anchorX="left"
             anchorY="middle"
-            maxWidth={2.1}
+            maxWidth={2.3}
           >
             Peresmian lab IoT &amp; robotika modern sebagai pusat pembelajaran praktis siswa.
           </Text>
           {/* 2024 */}
           <Text
-            position={[0.1, -0.48, 0.08]}
+            position={[-0.9, -0.48, 0.08]}
             fontSize={0.10}
             color="#CB2957"
             anchorX="left"
@@ -421,12 +421,12 @@ export default function MuseumScene() {
             2024
           </Text>
           <Text
-            position={[0.1, -0.62, 0.08]}
+            position={[-0.9, -0.62, 0.08]}
             fontSize={0.085}
             color="#000000"
             anchorX="left"
             anchorY="middle"
-            maxWidth={2.1}
+            maxWidth={2.3}
           >
             Meraih Akreditasi A serta penghargaan Sekolah Unggulan Berbasis Karakter.
           </Text>
@@ -524,8 +524,8 @@ export default function MuseumScene() {
       {[
         [-3.6, -11.5],
         [3.6, -11.5],
-        [-8.2, -1.8],
-        [8.2, -1.8],
+        [-8.2, -4.0],
+        [8.2, -4.0],
         [-3.8, 12.0],
         [3.8, 12.0],
       ].map(([x, z], idx) => (
