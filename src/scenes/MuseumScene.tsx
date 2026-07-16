@@ -573,70 +573,7 @@ export default function MuseumScene() {
         <pointLight position={[0, 1.65, 0]} intensity={2.0} distance={6} color="#CB2957" />
       </group>
 
-      {/* ═══════════════════════════════════════════════════════
-          GLASS TROPHY DISPLAY CASES — Achievement zones
-          ═══════════════════════════════════════════════════════ */}
-      {[
-        [-9, -5],
-        [9, -5],
-      ].map(([x, z], i) => (
-        <group key={`trophy-${i}`} position={[x, 0, z]}>
-          {/* Cabinet base plinth */}
-          <mesh castShadow receiveShadow position={[0, 0.32, 0]} userData={{ obstacle: true }}>
-            <boxGeometry args={[1.45, 0.64, 0.72]} />
-            <meshStandardMaterial color="#181818" roughness={0.38} metalness={0.55} />
-          </mesh>
 
-          {/* Glass body */}
-          <mesh castShadow position={[0, 1.06, 0]} userData={{ obstacle: true }}>
-            <boxGeometry args={[1.35, 1.24, 0.62]} />
-            <meshStandardMaterial
-              color="#c8e4f0"
-              roughness={0.04}
-              transparent
-              opacity={0.22}
-            />
-          </mesh>
-
-          {/* Glass frame edges */}
-          {[[-0.675, 0, 0], [0.675, 0, 0], [0, 0, -0.31], [0, 0, 0.31]].map(([fx, fy, fz], fi) => (
-            <mesh key={fi} position={[fx, 1.06, fz]} castShadow userData={{ obstacle: true }}>
-              <boxGeometry
-                args={
-                  fi < 2
-                    ? [0.02, 1.28, 0.66]
-                    : [1.39, 1.28, 0.02]
-                }
-              />
-              <meshStandardMaterial color="#222222" roughness={0.35} metalness={0.85} />
-            </mesh>
-          ))}
-
-          {/* Trophy cup */}
-          <mesh position={[0, 0.84, 0]} castShadow>
-            <cylinderGeometry args={[0.08, 0.13, 0.52, 16]} />
-            <meshStandardMaterial color="#c8920a" roughness={0.28} metalness={0.92} />
-          </mesh>
-          <mesh position={[0, 1.22, 0]} castShadow>
-            <cylinderGeometry args={[0.13, 0.07, 0.32, 16]} />
-            <meshStandardMaterial color="#d4a017" roughness={0.26} metalness={0.94} />
-          </mesh>
-
-          {/* Interior spotlight */}
-          <pointLight position={[0, 1.55, 0]} intensity={0.9} distance={2} color="#fff5cc" />
-
-          {/* Red base label strip */}
-          <mesh position={[0, 0.07, 0]} receiveShadow>
-            <boxGeometry args={[1.45, 0.055, 0.72]} />
-            <meshStandardMaterial
-              color="#CB2957"
-              emissive="#CB2957"
-              emissiveIntensity={0.9}
-              toneMapped={false}
-            />
-          </mesh>
-        </group>
-      ))}
 
 
 

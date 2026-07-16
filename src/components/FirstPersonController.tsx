@@ -220,9 +220,7 @@ export default function FirstPersonController({
       // Centerpiece (circle of radius 1.62)
       { type: "circle", x: 0, z: -2, r: 1.62 },
 
-      // Showcases / Display cases (box of size 1.45 (X) x 0.72 (Z))
-      { type: "box", x: -9, z: -5, hx: 0.725, hz: 0.36 },
-      { type: "box", x: 9, z: -5, hx: 0.725, hz: 0.36 },
+
     ];
 
     // Resolve collision
