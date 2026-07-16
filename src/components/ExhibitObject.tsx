@@ -121,9 +121,9 @@ export default function ExhibitObject({ item }: ExhibitObjectProps) {
         <meshStandardMaterial color="#0a0a0a" roughness={0.85} metalness={0.6} />
       </mesh>
 
-      {/* ── Beveled Square Central Column ── */}
-      <mesh castShadow receiveShadow position={[0, 0.48, 0]} rotation={[0, Math.PI / 4, 0]}>
-        <cylinderGeometry args={[0.26, 0.32, 0.76, 4]} />
+      {/* ── Simple Round Central Column ── */}
+      <mesh castShadow receiveShadow position={[0, 0.48, 0]}>
+        <cylinderGeometry args={[0.3, 0.3, 0.76, 32]} />
         <meshStandardMaterial color="#111111" roughness={0.75} metalness={0.5} />
       </mesh>
 
@@ -148,51 +148,31 @@ export default function ExhibitObject({ item }: ExhibitObjectProps) {
         <meshStandardMaterial color="#F5F5F5" roughness={0.15} metalness={0.1} />
       </mesh>
 
-      {/* ── Angled Information Plaque ── */}
-      <group position={[plaqueOffsetX, 0.74, 0]} rotation={[0, plaqueRotationY, 0.26]}>
-        {/* Plaque backboard (matte black) */}
-        <mesh castShadow>
-          <boxGeometry args={[0.02, 0.14, 0.28]} />
-          <meshStandardMaterial color="#111111" roughness={0.7} />
-        </mesh>
-        {/* Label face (printed white card) */}
-        <mesh position={[0.011, 0, 0]}>
-          <planeGeometry args={[0.26, 0.12]} />
-          <meshStandardMaterial color="#eeeeee" roughness={0.4} />
-        </mesh>
-        {/* Glass Cover */}
-        <mesh position={[0.013, 0, 0]} castShadow>
-          <planeGeometry args={[0.26, 0.12]} />
-          <meshPhysicalMaterial 
-            color="#ffffff" 
-            transmission={1} 
-            opacity={1} 
-            transparent 
-            roughness={0.05} 
-            ior={1.5} 
-            thickness={0.02} 
-          />
-        </mesh>
-        {/* Tiny exhibit print — x=0.018 places text clearly in front of face at x=0.011 */}
+      {/* ── Floating Text Only, No Plaque Meshes ── */}
+      <group position={[isLeftSide ? 0.5 : -0.5, PEDESTAL_HEIGHT + 0.05, 0]} rotation={[0, isLeftSide ? Math.PI/2 : -Math.PI/2, 0]}>
         <Suspense fallback={null}>
           <Text
-            position={[0.018, 0.02, 0]}
-            rotation={[0, Math.PI / 2, 0]}
-            fontSize={0.024}
-            color="#000000"
+            position={[0, 0.08, 0]}
+            rotation={[0, 0, 0]}
+            fontSize={0.06}
+            color={item.color}
             anchorX="center"
             anchorY="middle"
+            outlineWidth={0.003}
+            outlineColor="#000000"
           >
             {item.category.toUpperCase().replace("-", " ")}
           </Text>
           <Text
-            position={[0.018, -0.015, 0]}
-            rotation={[0, Math.PI / 2, 0]}
-            fontSize={0.02}
-            color="#CB2957"
+            position={[0, -0.03, 0]}
+            rotation={[0, 0, 0]}
+            fontSize={0.055}
+            color="#ffffff"
             anchorX="center"
             anchorY="middle"
-            maxWidth={0.24}
+            outlineWidth={0.003}
+            outlineColor="#000000"
+            maxWidth={0.55}
             textAlign="center"
           >
             {item.title}
