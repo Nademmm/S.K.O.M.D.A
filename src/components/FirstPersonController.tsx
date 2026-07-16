@@ -4,12 +4,38 @@ import { useEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { useKeyboardControls } from "@/hooks/useKeyboardControls";
+import { museumData } from "@/utils/museumData";
 
 const ROOM_HALF_WIDTH = 11; // batas collision sumbu X
 const ROOM_HALF_DEPTH = 13; // batas collision sumbu Z
 const PLAYER_RADIUS = 0.5;
 const EYE_HEIGHT = 1.6;
 const PITCH_LIMIT = Math.PI / 2 - 0.05; // ±~85° agar tidak flip
+
+// Define list of circular obstacles (showcases, pots, centerpiece)
+const CIRCLE_OBSTACLES = [
+  // 10 Showcases / Exhibit Pedestals
+  ...museumData.map((item) => ({
+    x: item.position[0],
+    z: item.position[2],
+    radius: 0.6,
+  })),
+  // 6 Pots / Concrete Planters
+  { x: -3.6, z: -11.5, radius: 0.42 },
+  { x: 3.6, z: -11.5, radius: 0.42 },
+  { x: -8.2, z: -4.0, radius: 0.42 },
+  { x: 8.2, z: -4.0, radius: 0.42 },
+  { x: -3.8, z: 12.0, radius: 0.42 },
+  { x: 3.8, z: 12.0, radius: 0.42 },
+  // Lobby Centerpiece (Orb)
+  { x: 0, z: -2, radius: 1.6 },
+];
+
+// Define list of box obstacles (Kursi / Benches)
+const BOX_OBSTACLES = [
+  { x: 0, z: -7, hx: 1.0, hz: 0.3 }, // Bench 1
+  { x: 0, z: 5, hx: 1.0, hz: 0.3 },  // Bench 2
+];
 
 /** Subset pengaturan yang mempengaruhi kamera first-person secara langsung. */
 export interface CameraSettings {
@@ -200,17 +226,75 @@ export default function FirstPersonController({
     const nextX = camera.position.x + direction.current.x;
     const nextZ = camera.position.z + direction.current.z;
 
-    // Collision sederhana: clamp posisi kamera di dalam batas ruangan.
-    const clampedX = THREE.MathUtils.clamp(
-      nextX,
-      -ROOM_HALF_WIDTH + PLAYER_RADIUS,
-      ROOM_HALF_WIDTH - PLAYER_RADIUS
-    );
-    const clampedZ = THREE.MathUtils.clamp(
-      nextZ,
-      -ROOM_HALF_DEPTH + PLAYER_RADIUS,
-      ROOM_HALF_DEPTH - PLAYER_RADIUS
-    );
+    // ── Collision Resolution (Dinding + Obstacles) ──────────────────────
+    let resolvedX = nextX;
+    let resolvedZ = nextZ;
+
+    // Lakukan 3 iterasi untuk menjamin penyelesaian tumpang tindih secara simultan
+    for (let iter = 0; iter < 3; iter++) {
+      // 1. Dinding ruangan (Clamp)
+      resolvedX = THREE.MathUtils.clamp(
+        resolvedX,
+        -ROOM_HALF_WIDTH + PLAYER_RADIUS,
+        ROOM_HALF_WIDTH - PLAYER_RADIUS
+      );
+      resolvedZ = THREE.MathUtils.clamp(
+        resolvedZ,
+        -ROOM_HALF_DEPTH + PLAYER_RADIUS,
+        ROOM_HALF_DEPTH - PLAYER_RADIUS
+      );
+
+      // 2. Obstacle Lingkaran (Showcases, Pots, Centerpiece Orb)
+      for (const obs of CIRCLE_OBSTACLES) {
+        const dx = resolvedX - obs.x;
+        const dz = resolvedZ - obs.z;
+        const distSq = dx * dx + dz * dz;
+        const combinedR = PLAYER_RADIUS + obs.radius;
+
+        if (distSq < combinedR * combinedR && distSq > 0.0001) {
+          const dist = Math.sqrt(distSq);
+          const overlap = combinedR - dist;
+          resolvedX += (dx / dist) * overlap;
+          resolvedZ += (dz / dist) * overlap;
+        }
+      }
+
+      // 3. Obstacle Box (Kursi / Benches)
+      for (const bench of BOX_OBSTACLES) {
+        const minX = bench.x - bench.hx;
+        const maxX = bench.x + bench.hx;
+        const minZ = bench.z - bench.hz;
+        const maxZ = bench.z + bench.hz;
+
+        const closestX = Math.max(minX, Math.min(resolvedX, maxX));
+        const closestZ = Math.max(minZ, Math.min(resolvedZ, maxZ));
+
+        const dx = resolvedX - closestX;
+        const dz = resolvedZ - closestZ;
+        const distSq = dx * dx + dz * dz;
+
+        if (distSq < PLAYER_RADIUS * PLAYER_RADIUS) {
+          const dist = Math.sqrt(distSq);
+          if (dist > 0.0001) {
+            const overlap = PLAYER_RADIUS - dist;
+            resolvedX += (dx / dist) * overlap;
+            resolvedZ += (dz / dist) * overlap;
+          } else {
+            // Jika berada tepat di dalam box, dorong keluar ke sisi terdekat
+            const distToMinX = Math.abs(resolvedX - minX);
+            const distToMaxX = Math.abs(resolvedX - maxX);
+            const distToMinZ = Math.abs(resolvedZ - minZ);
+            const distToMaxZ = Math.abs(resolvedZ - maxZ);
+
+            const minDist = Math.min(distToMinX, distToMaxX, distToMinZ, distToMaxZ);
+            if (minDist === distToMinX) resolvedX = minX - PLAYER_RADIUS;
+            else if (minDist === distToMaxX) resolvedX = maxX + PLAYER_RADIUS;
+            else if (minDist === distToMinZ) resolvedZ = minZ - PLAYER_RADIUS;
+            else resolvedZ = maxZ + PLAYER_RADIUS;
+          }
+        }
+      }
+    }
 
     // ── Head bobbing ────────────────────────────────────────────────────
     const bobActive = s.headBobbing && !s.reduceMotion;
@@ -223,7 +307,7 @@ export default function FirstPersonController({
       bobOffset = Math.sin(bobPhase.current) * 0.045 * moveAmount.current;
     }
 
-    camera.position.set(clampedX, EYE_HEIGHT + bobOffset, clampedZ);
+    camera.position.set(resolvedX, EYE_HEIGHT + bobOffset, resolvedZ);
   });
 
   // Look ditangani manual; komponen ini tidak merender objek scene.
