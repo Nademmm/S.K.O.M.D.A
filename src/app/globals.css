@@ -6,52 +6,52 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 :root {
-  /* Core palette */
-  --museum-bg:        #EEEEEE;
-  --museum-surface:   #DDDDDD;
-  --museum-accent:    #CB2957;
-  --museum-accent-soft: rgba(203, 41, 87, 0.12);
-  --museum-accent-dim:  rgba(203, 41, 87, 0.5);
-  --museum-text:      #000000;
-  --museum-text-dim:  rgba(0, 0, 0, 0.5);
-  --museum-text-faint:rgba(0, 0, 0, 0.28);
-
-  /* Glass surfaces */
-  --museum-glass:          rgba(238, 238, 238, 0.80);
-  --museum-glass-heavy:    rgba(238, 238, 238, 0.92);
-  --museum-glass-border:   rgba(0, 0, 0, 0.08);
-  --museum-glass-border-strong: rgba(0, 0, 0, 0.14);
-
-  /* Shadows */
-  --museum-shadow-sm:  0 2px 8px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);
-  --museum-shadow-md:  0 8px 24px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.06);
-  --museum-shadow-lg:  0 24px 64px rgba(0,0,0,0.14), 0 0 0 1px rgba(0,0,0,0.06);
-
-  /* Typography */
-  --font-heading: "Poppins", system-ui, sans-serif;
-  --font-body:    "Inter", system-ui, sans-serif;
-
-  /* Legacy Next.js */
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #000000;
+  --foreground: #EEEEEE;
 }
 
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html, body {
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans), system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-display), sans-serif;
+  --font-mono: var(--font-mono), monospace;
+  
+  /* Strict Palette */
+  --color-onboarding-bg: #000000;
+  --color-onboarding-surface: #111111;
+  --color-onboarding-text: #EEEEEE;
+  --color-onboarding-secondary: #DDDDDD;
+  --color-onboarding-accent: #CB2957;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-body);
+  background-color: var(--color-onboarding-bg);
+  color: var(--color-onboarding-text);
+  font-family: var(--font-sans);
+}
+
+/* Scrollbar behaviors */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Micro-noise texture for depth */
+.noise-overlay {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 0);
+  background-size: 16px 16px;
+}
+
+/* Subtle animated grid lines */
+.grid-bg {
+  background-size: 80px 80px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.007) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.007) 1px, transparent 1px);
 }
 
 /* ── Accessibility toggles (dikendalikan AccessibilityEffects) ─────────── */
