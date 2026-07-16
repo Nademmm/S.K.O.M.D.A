@@ -52,7 +52,7 @@ export default function InteractionManager({
   onInteract,
   onHoverChange,
 }: InteractionManagerProps) {
-  const { camera } = useThree();
+  const { camera, scene } = useThree();
 
   // Track previous hover ID to emit change events only (not every frame)
   const prevHoveredId = useRef<string | null>(null);
@@ -101,7 +101,7 @@ export default function InteractionManager({
     };
   }, [enabled]);
 
-  // ── Per-frame raycast against whitelist ──────────────────────────────────
+  // ── Per-frame raycast against scene for obstacle testing ───────────────────
   useFrame(() => {
     if (!enabled) {
       // Clear state when disabled (no movement, in menus, etc.)
@@ -118,33 +118,41 @@ export default function InteractionManager({
       return;
     }
 
-    // Build targets array from the collider registry (only registered exhibits)
-    const targets: THREE.Mesh[] = [];
-    colliderRegistry.forEach((mesh) => targets.push(mesh));
-
-    if (targets.length === 0) return;
+    // Check if there are active colliders registered
+    if (colliderRegistry.size === 0) return;
 
     // Fire raycaster from camera center (NDC 0,0 = screen center)
     _raycaster.setFromCamera(_screenCenter, camera);
 
-    // Intersect only the whitelist — not the entire scene
-    // recursive=false: each collider is a single flat mesh, no children to traverse
-    const intersects = _raycaster.intersectObjects(targets, false);
+    // Intersect the entire scene to detect both target colliders and blocking obstacles
+    const intersects = _raycaster.intersectObjects(scene.children, true);
 
     let newHoveredId: string | null = null;
     let newDistance = Infinity;
 
-    if (intersects.length > 0) {
-      const hit = intersects[0]; // closest hit (Three.js sorts ascending)
-      if (hit.distance <= MAX_INTERACT_DISTANCE) {
-        // Resolve which exhibit owns this collider mesh
-        for (const [id, mesh] of colliderRegistry) {
-          if (mesh === hit.object) {
-            newHoveredId = id;
-            newDistance = hit.distance;
-            break;
-          }
+    for (const hit of intersects) {
+      // 1. Check if the intersected object is a registered target collider
+      let foundId: string | null = null;
+      for (const [id, mesh] of colliderRegistry) {
+        if (mesh === hit.object) {
+          foundId = id;
+          break;
         }
+      }
+
+      if (foundId) {
+        // We hit the exhibit collider first before any blocking obstacles
+        if (hit.distance <= MAX_INTERACT_DISTANCE) {
+          newHoveredId = foundId;
+          newDistance = hit.distance;
+        }
+        break;
+      }
+
+      // 2. Check if the object is explicitly marked as an obstacle
+      if (hit.object.userData?.obstacle) {
+        // Hit was blocked by a wall, showcase, column, bench, etc.
+        break;
       }
     }
 

@@ -3,6 +3,7 @@
 import { Suspense, useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
+import { EffectComposer, Bloom, Vignette, N8AO } from "@react-three/postprocessing";
 import FirstPersonController, {
   type CameraSettings,
 } from "@/components/FirstPersonController";
@@ -222,13 +223,17 @@ export default function MuseumExperience() {
         onCreated={({ gl }) => {
           gl.shadowMap.type = THREE.PCFShadowMap;
         }}
-        // Block pointer events while InfoDrawer is open — prevents clicks
-        // from passing through the scrim into the R3F scene and re-triggering
-        // exhibit selection while the player is reading the panel.
-        style={{ pointerEvents: showcasing ? "none" : "auto" }}
+        style={{ pointerEvents: "auto" }}
       >
-        <color attach="background" args={["#e8e8e8"]} />
-        <fog attach="fog" args={["#e8e8e8", 18, 50]} />
+        <color attach="background" args={["#f2f0ec"]} />
+        <fog attach="fog" args={["#f2f0ec", 20, 55]} />
+        
+        <EffectComposer multisampling={8}>
+          <N8AO distanceFalloff={1} aoRadius={1.2} intensity={2.2} />
+          <Bloom luminanceThreshold={0.9} mipmapBlur intensity={0.6} />
+          <Vignette eskil={false} offset={0.15} darkness={0.72} />
+        </EffectComposer>
+
         <Suspense fallback={null}>
           <MuseumScene />
         </Suspense>

@@ -91,7 +91,7 @@ export default function ExhibitObject({ item }: ExhibitObjectProps) {
 
     if (coneRef.current) {
       const mat = coneRef.current.material as THREE.MeshBasicMaterial;
-      mat.opacity = 0.04 + glowRef.current * 0.07;
+      mat.opacity = 0.02 + glowRef.current * 0.04;
     }
   });
 
@@ -118,13 +118,13 @@ export default function ExhibitObject({ item }: ExhibitObjectProps) {
       {/* ── Matte Black Base (Lower Plinth) ── */}
       <mesh castShadow receiveShadow position={[0, 0.05, 0]}>
         <boxGeometry args={[0.82, 0.1, 0.82]} />
-        <meshStandardMaterial color="#121212" roughness={0.8} metalness={0.15} />
+        <meshStandardMaterial color="#0a0a0a" roughness={0.85} metalness={0.6} />
       </mesh>
 
       {/* ── Beveled Square Central Column ── */}
       <mesh castShadow receiveShadow position={[0, 0.48, 0]} rotation={[0, Math.PI / 4, 0]}>
         <cylinderGeometry args={[0.26, 0.32, 0.76, 4]} />
-        <meshStandardMaterial color="#181818" roughness={0.7} metalness={0.2} />
+        <meshStandardMaterial color="#111111" roughness={0.75} metalness={0.5} />
       </mesh>
 
       {/* ── Accent LED Glow Ring (Under the Marble Top) ── */}
@@ -137,7 +137,7 @@ export default function ExhibitObject({ item }: ExhibitObjectProps) {
         <meshStandardMaterial
           color={item.color}
           emissive={item.color}
-          emissiveIntensity={1.0}
+          emissiveIntensity={1.5}
           toneMapped={false}
         />
       </mesh>
@@ -145,7 +145,7 @@ export default function ExhibitObject({ item }: ExhibitObjectProps) {
       {/* ── Polished White Marble Top Plate ── */}
       <mesh castShadow position={[0, PEDESTAL_HEIGHT - 0.03, 0]}>
         <cylinderGeometry args={[0.38, 0.38, 0.06, 32]} />
-        <meshStandardMaterial color="#fcfcfc" roughness={0.15} metalness={0.05} />
+        <meshStandardMaterial color="#F5F5F5" roughness={0.15} metalness={0.1} />
       </mesh>
 
       {/* ── Angled Information Plaque ── */}
@@ -153,12 +153,25 @@ export default function ExhibitObject({ item }: ExhibitObjectProps) {
         {/* Plaque backboard (matte black) */}
         <mesh castShadow>
           <boxGeometry args={[0.02, 0.14, 0.28]} />
-          <meshStandardMaterial color="#1a1a1a" roughness={0.65} />
+          <meshStandardMaterial color="#111111" roughness={0.7} />
         </mesh>
         {/* Label face (printed white card) */}
         <mesh position={[0.011, 0, 0]}>
           <planeGeometry args={[0.26, 0.12]} />
-          <meshStandardMaterial color="#f0f0f0" roughness={0.4} />
+          <meshStandardMaterial color="#eeeeee" roughness={0.4} />
+        </mesh>
+        {/* Glass Cover */}
+        <mesh position={[0.013, 0, 0]} castShadow>
+          <planeGeometry args={[0.26, 0.12]} />
+          <meshPhysicalMaterial 
+            color="#ffffff" 
+            transmission={1} 
+            opacity={1} 
+            transparent 
+            roughness={0.05} 
+            ior={1.5} 
+            thickness={0.02} 
+          />
         </mesh>
         {/* Tiny exhibit print — x=0.018 places text clearly in front of face at x=0.011 */}
         <Suspense fallback={null}>
@@ -209,11 +222,11 @@ export default function ExhibitObject({ item }: ExhibitObjectProps) {
         position={[0, 4.8, 0]}
         target-position={[0, PEDESTAL_HEIGHT, 0]}
         angle={0.48}
-        penumbra={0.7}
-        intensity={hovered ? 12 : 7}
-        color="#FFF2E5"
+        penumbra={1.0}
+        intensity={hovered ? 14 : 8}
+        color="#FFF0E5"
         castShadow
-        shadow-mapSize={[1024, 1024]}
+        shadow-mapSize={[2048, 2048]}
         shadow-bias={-0.0001}
       />
 

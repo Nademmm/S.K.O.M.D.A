@@ -7,7 +7,7 @@ import { useKeyboardControls } from "@/hooks/useKeyboardControls";
 
 const ROOM_HALF_WIDTH = 11; // batas collision sumbu X
 const ROOM_HALF_DEPTH = 13; // batas collision sumbu Z
-const PLAYER_RADIUS = 0.5;
+const PLAYER_RADIUS = 0.4; // smooth responsive collision radius
 const EYE_HEIGHT = 1.6;
 const PITCH_LIMIT = Math.PI / 2 - 0.05; // ±~85° agar tidak flip
 
@@ -200,17 +200,92 @@ export default function FirstPersonController({
     const nextX = camera.position.x + direction.current.x;
     const nextZ = camera.position.z + direction.current.z;
 
-    // Collision sederhana: clamp posisi kamera di dalam batas ruangan.
-    const clampedX = THREE.MathUtils.clamp(
-      nextX,
-      -ROOM_HALF_WIDTH + PLAYER_RADIUS,
-      ROOM_HALF_WIDTH - PLAYER_RADIUS
-    );
-    const clampedZ = THREE.MathUtils.clamp(
-      nextZ,
-      -ROOM_HALF_DEPTH + PLAYER_RADIUS,
-      ROOM_HALF_DEPTH - PLAYER_RADIUS
-    );
+    // List of static obstacles in the museum for 2D collision detection and resolution
+    const OBSTACLES = [
+      // 10 Exhibit Pedestals (box of size 0.82 x 0.82)
+      { type: "box", x: -9, z: -6, hx: 0.41, hz: 0.41 },
+      { type: "box", x: -9, z: -2, hx: 0.41, hz: 0.41 },
+      { type: "box", x: -9, z: 2, hx: 0.41, hz: 0.41 },
+      { type: "box", x: -9, z: 6, hx: 0.41, hz: 0.41 },
+      { type: "box", x: -9, z: 10, hx: 0.41, hz: 0.41 },
+      { type: "box", x: 9, z: -6, hx: 0.41, hz: 0.41 },
+      { type: "box", x: 9, z: -2, hx: 0.41, hz: 0.41 },
+      { type: "box", x: 9, z: 2, hx: 0.41, hz: 0.41 },
+      { type: "box", x: 9, z: 6, hx: 0.41, hz: 0.41 },
+      { type: "box", x: 9, z: 10, hx: 0.41, hz: 0.41 },
+
+      // Centerpiece (circle of radius 1.62)
+      { type: "circle", x: 0, z: -2, r: 1.62 },
+
+      // Benches (repositioned to frame centerline at X = -4.8 / 4.8, Z = -2, rotated 90 degrees)
+      // Size: 2.5 (Z) x 0.65 (X) -> half-width = 0.325, half-depth = 1.25
+      { type: "box", x: -4.8, z: -2, hx: 0.325, hz: 1.25 },
+      { type: "box", x: 4.8, z: -2, hx: 0.325, hz: 1.25 },
+
+      // Showcases / Display cases (box of size 1.45 (X) x 0.72 (Z))
+      { type: "box", x: -9, z: -5, hx: 0.725, hz: 0.36 },
+      { type: "box", x: 9, z: -5, hx: 0.725, hz: 0.36 },
+    ];
+
+    // Resolve collision
+    let resolvedX = nextX;
+    let resolvedZ = nextZ;
+
+    // Clamp within outer walls (accounting for panels)
+    resolvedX = THREE.MathUtils.clamp(resolvedX, -11.3, 11.3);
+    resolvedZ = THREE.MathUtils.clamp(resolvedZ, -13.2, 13.2);
+
+    // Multi-pass resolution to prevent slipping into corners
+    for (let pass = 0; pass < 2; pass++) {
+      for (const obs of OBSTACLES) {
+        if (obs.type === "circle" && obs.r !== undefined) {
+          const dx = resolvedX - obs.x;
+          const dz = resolvedZ - obs.z;
+          const distSq = dx * dx + dz * dz;
+          const minDist = PLAYER_RADIUS + obs.r;
+          if (distSq < minDist * minDist) {
+            const dist = Math.sqrt(distSq);
+            if (dist > 0.0001) {
+              resolvedX = obs.x + (dx / dist) * minDist;
+              resolvedZ = obs.z + (dz / dist) * minDist;
+            } else {
+              resolvedZ = obs.z + minDist;
+            }
+          }
+        } else if (obs.type === "box" && obs.hx !== undefined && obs.hz !== undefined) {
+          const minX = obs.x - obs.hx;
+          const maxX = obs.x + obs.hx;
+          const minZ = obs.z - obs.hz;
+          const maxZ = obs.z + obs.hz;
+
+          const px = Math.max(minX, Math.min(resolvedX, maxX));
+          const pz = Math.max(minZ, Math.min(resolvedZ, maxZ));
+          const dx = resolvedX - px;
+          const dz = resolvedZ - pz;
+          const distSq = dx * dx + dz * dz;
+          if (distSq < PLAYER_RADIUS * PLAYER_RADIUS) {
+            const dist = Math.sqrt(distSq);
+            if (dist > 0.0001) {
+              resolvedX = px + (dx / dist) * PLAYER_RADIUS;
+              resolvedZ = pz + (dz / dist) * PLAYER_RADIUS;
+            } else {
+              const leftDist = resolvedX - minX;
+              const rightDist = maxX - resolvedX;
+              const topDist = resolvedZ - minZ;
+              const bottomDist = maxZ - resolvedZ;
+              const minDist = Math.min(leftDist, rightDist, topDist, bottomDist);
+              if (minDist === leftDist) resolvedX = minX - PLAYER_RADIUS;
+              else if (minDist === rightDist) resolvedX = maxX + PLAYER_RADIUS;
+              else if (minDist === topDist) resolvedZ = minZ - PLAYER_RADIUS;
+              else resolvedZ = maxZ + PLAYER_RADIUS;
+            }
+          }
+        }
+      }
+      // Re-clamp
+      resolvedX = THREE.MathUtils.clamp(resolvedX, -11.3, 11.3);
+      resolvedZ = THREE.MathUtils.clamp(resolvedZ, -13.2, 13.2);
+    }
 
     // ── Head bobbing ────────────────────────────────────────────────────
     const bobActive = s.headBobbing && !s.reduceMotion;
@@ -223,7 +298,7 @@ export default function FirstPersonController({
       bobOffset = Math.sin(bobPhase.current) * 0.045 * moveAmount.current;
     }
 
-    camera.position.set(clampedX, EYE_HEIGHT + bobOffset, clampedZ);
+    camera.position.set(resolvedX, EYE_HEIGHT + bobOffset, resolvedZ);
   });
 
   // Look ditangani manual; komponen ini tidak merender objek scene.
