@@ -24,3 +24,25 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ── Accessibility toggles (dikendalikan AccessibilityEffects) ─────────── */
+
+/* Large Text: perbesar skala teks UI overlay secara global. */
+.skomda-large-text {
+  font-size: 118%;
+}
+
+/* High Contrast: pertajam kontras & saturasi seluruh tampilan. */
+.skomda-high-contrast body {
+  filter: contrast(1.28) saturate(1.35) brightness(1.04);
+}
+
+/* Reduce Motion: pangkas durasi animasi/transisi di seluruh dokumen. */
+.skomda-reduce-motion *,
+.skomda-reduce-motion *::before,
+.skomda-reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
