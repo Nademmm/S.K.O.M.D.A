@@ -92,12 +92,12 @@ export default function SettingsPanel({ open, onClose }: SettingsPanelProps) {
   const [confirmReset, setConfirmReset] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
-  // Tutup dengan Escape (kecuali dialog konfirmasi sedang terbuka).
+  // Close with O key (same key that opens it — acts as a toggle).
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      if (confirmReset) return; // dialog menangani Escape-nya sendiri
+      if (e.key !== "o" && e.key !== "O" && e.key !== "Escape") return;
+      if (confirmReset) return; // dialog handles its own keys
       e.preventDefault();
       onClose();
     };

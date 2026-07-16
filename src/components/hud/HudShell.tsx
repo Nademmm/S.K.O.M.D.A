@@ -207,8 +207,8 @@ export default function HudShell({
           type="button"
           className={styles.iconBtn}
           onClick={onOpenSettings}
-          aria-label="Buka pengaturan"
-          title="Pengaturan"
+          aria-label="Buka pengaturan [O]"
+          title="Pengaturan [O]"
         >
           <SettingsIcon />
         </button>

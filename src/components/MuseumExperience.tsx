@@ -113,18 +113,15 @@ export default function MuseumExperience() {
     setAppState((s) => (s === "exploring" ? "ready-to-explore" : s));
   }, []);
 
-  // Pointer lock lost while exploring.
-  // If the loss was intentional (exhibit opened), skip — Settings should NOT open.
-  // If it was unintentional (player pressed Esc), open Settings as a pause menu.
+  // Pointer lock lost while exploring — just release, do NOT open settings.
+  // Settings are now opened with the O key instead.
   const handlePointerLockLost = useCallback(() => {
     if (intentionalLockRelease.current) {
       intentionalLockRelease.current = false; // consume the flag
-      return; // do NOT open Settings
+      return;
     }
-    setSettingsOpen((open) => {
-      if (!open) return true;
-      return open;
-    });
+    // Simply transition back to ready-to-explore (pointer lock released)
+    setAppState((s) => (s === "exploring" ? "ready-to-explore" : s));
   }, []);
 
   const handleSelectExhibit = useCallback((item: ExhibitItem | null) => {
@@ -175,6 +172,20 @@ export default function MuseumExperience() {
       canvas.requestPointerLock();
     }
   }, []);
+
+  // ── O key — open Settings panel ─────────────────────────────────────────
+
+  useEffect(() => {
+    if (appState !== "exploring" && appState !== "ready-to-explore") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "o" || e.key === "O") {
+        e.preventDefault();
+        openSettings();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [appState, openSettings]);
 
   // ── M key — toggle mission panel ─────────────────────────────────────────
 
@@ -313,7 +324,9 @@ export default function MuseumExperience() {
       {/* Landing overlay */}
       {appState === "idle" && <LandingOverlay onEnter={handleEnter} />}
 
-      {/* Prompt to click and engage pointer lock after cinematic */}
+
+      {/* When pointer lock is released (ESC), just show a subtle click-to-resume hint
+          with NO blur/darkening — the museum stays fully visible and interactive */}
       {appState === "ready-to-explore" && !settingsOpen && (
         <div
           onClick={handleStartExploring}
@@ -321,59 +334,13 @@ export default function MuseumExperience() {
             position: "absolute",
             inset: 0,
             zIndex: 40,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "rgba(0,0,0,0.25)",
-            backdropFilter: "blur(4px)",
-            WebkitBackdropFilter: "blur(4px)",
             cursor: "pointer",
           }}
-        >
-          <div
-            style={{
-              padding: "1.25rem 2rem",
-              background: "rgba(238,238,238,0.85)",
-              border: "1px solid rgba(0,0,0,0.08)",
-              borderRadius: "1.2rem",
-              textAlign: "center",
-              boxShadow: "0 16px 48px rgba(0,0,0,0.18)",
-              animation: "fadeIn 0.5s ease",
-              backdropFilter: "blur(16px)",
-              fontFamily: '"Inter", system-ui, sans-serif',
-            }}
-          >
-            <h2
-              style={{
-                fontSize: "1.2rem",
-                margin: "0 0 0.4rem 0",
-                fontFamily: '"Poppins", sans-serif',
-                fontWeight: 700,
-                color: "#000",
-              }}
-            >
-              Siap Menjelajah
-            </h2>
-            <p style={{ margin: 0, color: "rgba(0,0,0,0.52)", fontSize: "0.88rem" }}>
-              Klik layar untuk mulai dan mengunci kursor
-            </p>
-          </div>
-          <style
-            dangerouslySetInnerHTML={{
-              __html: `
-              @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(10px) scale(0.95); }
-                to   { opacity: 1; transform: translateY(0) scale(1); }
-              }
-            `,
-            }}
-          />
-        </div>
+        />
       )}
 
-      {/* ── HUD Shell (exploring only — hidden while showcasing a panel) */}
-      {exploring && !settingsOpen && (
+      {/* ── HUD Shell — visible while exploring OR cursor-free (ready-to-explore) */}
+      {(exploring || appState === "ready-to-explore") && !settingsOpen && (
         <HudShell
           selected={selected}
           visitedExhibits={visitedExhibits}

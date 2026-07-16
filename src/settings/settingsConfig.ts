@@ -204,7 +204,7 @@ export const KEYBINDS: Keybind[] = [
   { keys: ["Shift"], action: "Sprint" },
   { keys: ["Space"], action: "Jump" },
   { keys: ["E"], action: "Interact" },
-  { keys: ["Esc"], action: "Pause" },
+  { keys: ["O"], action: "Settings / Pause" },
 ];
 
 /* ─────────────────────────────────────────────────────────────────────────
