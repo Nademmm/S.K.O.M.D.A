@@ -175,35 +175,68 @@ export default function MuseumExperience() {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            background: "rgba(0,0,0,0.3)",
-            backdropFilter: "blur(4px)",
-            WebkitBackdropFilter: "blur(4px)",
+            background: "rgba(10, 10, 11, 0.55)",
             cursor: "pointer",
-            color: "white",
-            fontFamily: "system-ui, sans-serif",
+            animation: "readyFadeIn 0.7s cubic-bezier(0.25,0.1,0.25,1) forwards",
           }}
+          role="button"
+          aria-label="Click to begin exploration"
         >
           <div
             style={{
-              padding: "1rem 2rem",
-              background: "rgba(255,255,255,0.1)",
-              border: "1px solid rgba(255,255,255,0.2)",
-              borderRadius: "1rem",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "1rem",
               textAlign: "center",
-              animation: "fadeIn 0.5s ease",
             }}
           >
-            <h2 style={{ fontSize: "1.5rem", margin: "0 0 0.5rem 0", fontWeight: 600 }}>
-              Siap Menjelajah
-            </h2>
-            <p style={{ margin: 0, color: "rgba(255,255,255,0.7)", fontSize: "0.9rem" }}>
-              Klik layar untuk mulai dan mengunci kursor
+            {/* Thin accent line */}
+            <div
+              style={{
+                width: "36px",
+                height: "1px",
+                background: "rgba(197, 168, 128, 0.4)",
+              }}
+            />
+            <p
+              style={{
+                fontFamily: "var(--font-sans, system-ui, sans-serif)",
+                fontSize: "0.7rem",
+                fontWeight: 300,
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: "rgba(228, 220, 210, 0.45)",
+                margin: 0,
+              }}
+            >
+              Click anywhere to continue
             </p>
+            <p
+              style={{
+                fontFamily: "var(--font-serif, Georgia, serif)",
+                fontSize: "1.1rem",
+                fontWeight: 300,
+                letterSpacing: "-0.01em",
+                color: "rgba(228, 220, 210, 0.75)",
+                margin: 0,
+                fontStyle: "italic",
+              }}
+            >
+              The museum awaits
+            </p>
+            <div
+              style={{
+                width: "36px",
+                height: "1px",
+                background: "rgba(197, 168, 128, 0.4)",
+              }}
+            />
           </div>
           <style dangerouslySetInnerHTML={{ __html: `
-            @keyframes fadeIn {
-              from { opacity: 0; transform: translateY(10px) scale(0.95); }
-              to { opacity: 1; transform: translateY(0) scale(1); }
+            @keyframes readyFadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
             }
           `}} />
         </div>
