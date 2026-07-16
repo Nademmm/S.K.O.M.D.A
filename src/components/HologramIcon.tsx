@@ -35,7 +35,9 @@ export default function HologramIcon({ icon, color, glow = 0 }: HologramIconProp
   }, [color]);
 
   // Perbarui intensitas emissive & opacity sesuai glow (hover)
+  // eslint-disable-next-line react-hooks/immutability
   material.emissiveIntensity = 0.9 + glow * 0.8;
+  // eslint-disable-next-line react-hooks/immutability
   material.opacity = 0.55 + glow * 0.25;
 
   return <group scale={0.5}>{renderIcon(icon, material)}</group>;

@@ -36,6 +36,7 @@ export default function InfoDrawer({ item, onClose }: InfoDrawerProps) {
   useEffect(() => {
     if (item) {
       if (closeTimer.current) clearTimeout(closeTimer.current);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDisplayItem(item);
     } else {
       closeTimer.current = setTimeout(() => setDisplayItem(null), 800);

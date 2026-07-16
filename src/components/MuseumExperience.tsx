@@ -1,13 +1,21 @@
 "use client";
 
-import { Suspense, useState, useCallback } from "react";
+import { Suspense, useState, useCallback, useMemo } from "react";
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
-import FirstPersonController from "@/components/FirstPersonController";
+import FirstPersonController, {
+  type CameraSettings,
+} from "@/components/FirstPersonController";
 import InfoDrawer from "@/components/InfoDrawer";
 import LandingOverlay from "@/components/LandingOverlay";
 import CinematicCamera from "@/components/CinematicCamera";
 import MuseumScene from "@/scenes/MuseumScene";
+import { useSettings } from "@/settings/SettingsContext";
+import SettingsPanel from "@/components/settings/SettingsPanel";
+import SettingsButton from "@/components/settings/SettingsButton";
+import Crosshair from "@/components/settings/Crosshair";
+import FpsCounter from "@/components/settings/FpsCounter";
+import AccessibilityEffects from "@/components/settings/AccessibilityEffects";
 import type { ExhibitItem } from "@/utils/museumData";
 
 type AppState = "idle" | "cinematic" | "ready-to-explore" | "exploring";
@@ -23,20 +31,57 @@ type AppState = "idle" | "cinematic" | "ready-to-explore" | "exploring";
  *   exploring        → First-person controls active, pointer-lock engaged
  */
 export default function MuseumExperience() {
+  const { settings } = useSettings();
   const [selected, setSelected] = useState<ExhibitItem | null>(null);
   const [appState, setAppState] = useState<AppState>("idle");
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const handleEnter = useCallback(() => {
-    setAppState("cinematic");
+  const handleEnter = useCallback(() => setAppState("cinematic"), []);
+  const handleCinematicComplete = useCallback(
+    () => setAppState("ready-to-explore"),
+    []
+  );
+  const handleStartExploring = useCallback(() => setAppState("exploring"), []);
+
+  // Membuka Settings → jeda kontrol first-person & lepas pointer lock.
+  const openSettings = useCallback(() => setSettingsOpen(true), []);
+  const closeSettings = useCallback(() => {
+    setSettingsOpen(false);
+    // Kembali ke prompt agar pengguna klik untuk mengunci pointer lagi.
+    setAppState((s) => (s === "exploring" ? "ready-to-explore" : s));
   }, []);
 
-  const handleCinematicComplete = useCallback(() => {
-    setAppState("ready-to-explore");
+  // Pointer lock hilang selagi menjelajah (mis. tekan Esc) → buka Settings (pause).
+  const handlePointerLockLost = useCallback(() => {
+    setSettingsOpen((open) => {
+      if (!open) return true;
+      return open;
+    });
   }, []);
 
-  const handleStartExploring = useCallback(() => {
-    setAppState("exploring");
-  }, []);
+  // Subset pengaturan yang relevan untuk kamera — diteruskan sebagai props
+  // karena React Context tidak menembus boundary reconciler <Canvas>.
+  const cameraSettings = useMemo<CameraSettings>(
+    () => ({
+      mouseSensitivity: settings.mouseSensitivity,
+      cameraSmoothness: settings.cameraSmoothness,
+      cameraFov: settings.cameraFov,
+      invertYAxis: settings.invertYAxis,
+      mouseAcceleration: settings.mouseAcceleration,
+      cameraShake: settings.cameraShake,
+      walkingSpeed: settings.walkingSpeed,
+      runningSpeed: settings.runningSpeed,
+      headBobbing: settings.headBobbing,
+      reduceMotion: settings.reduceMotion,
+    }),
+    [settings]
+  );
+
+  const exploring = appState === "exploring";
+  const controllerEnabled = exploring && !settingsOpen;
+  const showCrosshair =
+    !settingsOpen &&
+    (controllerEnabled || (settings.alwaysCrosshair && appState !== "idle"));
 
   return (
     <div
@@ -48,11 +93,17 @@ export default function MuseumExperience() {
         background: "#000",
       }}
     >
+      {/* Efek accessibility global (high contrast, large text, color blind, dsb.) */}
+      <AccessibilityEffects />
+
       <Canvas
         shadows
         // Start camera exactly at the first cinematic waypoint to prevent teleports
-        camera={{ fov: 75, near: 0.1, far: 100, position: [0, 12, 20] }}
-        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping }}
+        camera={{ fov: settings.cameraFov, near: 0.1, far: 100, position: [0, 12, 20] }}
+        gl={{
+          antialias: settings.antiAliasing,
+          toneMapping: THREE.ACESFilmicToneMapping,
+        }}
         onCreated={({ gl }) => {
           gl.shadowMap.type = THREE.PCFShadowMap;
         }}
@@ -71,26 +122,28 @@ export default function MuseumExperience() {
           />
         )}
 
-        {/* First-person controls — only active when exploring */}
-        <FirstPersonController enabled={appState === "exploring"} />
+        {/* First-person controls — active only when exploring & settings closed */}
+        <FirstPersonController
+          enabled={controllerEnabled}
+          settings={cameraSettings}
+          onPointerLockLost={handlePointerLockLost}
+        />
       </Canvas>
 
-      {/* Crosshair — only visible while exploring */}
-      {appState === "exploring" && (
-        <div
-          style={{
-            pointerEvents: "none",
-            position: "absolute",
-            left: "50%",
-            top: "50%",
-            width: 8,
-            height: 8,
-            transform: "translate(-50%, -50%)",
-            borderRadius: "50%",
-            background: "rgba(255,255,255,0.8)",
-            boxShadow: "0 0 6px rgba(255,255,255,0.3)",
-          }}
+      {/* Crosshair — style & visibility dikendalikan pengaturan */}
+      {showCrosshair && (
+        <Crosshair
+          style={settings.crosshairStyle}
+          color={settings.highContrast ? "#ffffff" : "rgba(255,255,255,0.85)"}
         />
+      )}
+
+      {/* FPS counter */}
+      {settings.showFps && appState !== "idle" && <FpsCounter />}
+
+      {/* Tombol pengaturan (gear) — tampil setelah landing */}
+      {appState !== "idle" && !settingsOpen && (
+        <SettingsButton onClick={openSettings} />
       )}
 
       {/* Cinematic vignette overlay during camera flythrough */}
@@ -111,7 +164,7 @@ export default function MuseumExperience() {
       {appState === "idle" && <LandingOverlay onEnter={handleEnter} />}
 
       {/* Prompt to click and engage pointer lock after cinematic */}
-      {appState === "ready-to-explore" && (
+      {appState === "ready-to-explore" && !settingsOpen && (
         <div
           onClick={handleStartExploring}
           style={{
@@ -158,6 +211,9 @@ export default function MuseumExperience() {
 
       {/* Floating info popup for clicked exhibits */}
       <InfoDrawer item={selected} onClose={() => setSelected(null)} />
+
+      {/* Settings panel (pause menu) */}
+      <SettingsPanel open={settingsOpen} onClose={closeSettings} />
     </div>
   );
 }
