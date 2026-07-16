@@ -86,8 +86,11 @@ export default function FirstPersonController({
     if (!enabled) return;
     const el = gl.domElement;
 
-    const requestLock = () => {
-      if (document.pointerLockElement !== el) el.requestPointerLock();
+    const requestLock = (e: PointerEvent) => {
+      // Only lock pointer on left click (button 0)
+      if (e.button === 0 && document.pointerLockElement !== el) {
+        el.requestPointerLock();
+      }
     };
 
     const onMouseMove = (e: MouseEvent) => {
@@ -216,11 +219,6 @@ export default function FirstPersonController({
 
       // Centerpiece (circle of radius 1.62)
       { type: "circle", x: 0, z: -2, r: 1.62 },
-
-      // Benches (repositioned to frame centerline at X = -4.8 / 4.8, Z = -2, rotated 90 degrees)
-      // Size: 2.5 (Z) x 0.65 (X) -> half-width = 0.325, half-depth = 1.25
-      { type: "box", x: -4.8, z: -2, hx: 0.325, hz: 1.25 },
-      { type: "box", x: 4.8, z: -2, hx: 0.325, hz: 1.25 },
 
       // Showcases / Display cases (box of size 1.45 (X) x 0.72 (Z))
       { type: "box", x: -9, z: -5, hx: 0.725, hz: 0.36 },

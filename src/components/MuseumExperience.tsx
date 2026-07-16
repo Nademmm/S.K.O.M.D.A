@@ -100,10 +100,6 @@ export default function MuseumExperience() {
   
   const handleStartExploring    = useCallback(() => {
     setAppState("exploring");
-    const canvas = document.querySelector("canvas");
-    if (canvas) {
-      canvas.requestPointerLock();
-    }
   }, []);
 
   // Membuka Settings → jeda kontrol first-person & lepas pointer lock.
@@ -200,6 +196,31 @@ export default function MuseumExperience() {
     return () => window.removeEventListener("keydown", onKey);
   }, [appState]);
 
+  // ── Left click anywhere to resume from ready-to-explore ──────────────────
+
+  useEffect(() => {
+    if (appState !== "ready-to-explore" || settingsOpen) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (e.button === 0) {
+        e.preventDefault();
+        handleStartExploring();
+      }
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [appState, settingsOpen, handleStartExploring]);
+
+  // ── Auto-request pointer lock when entering exploring state ──────────────
+
+  useEffect(() => {
+    if (appState === "exploring" && !settingsOpen) {
+      const canvas = document.querySelector("canvas");
+      if (canvas && document.pointerLockElement !== canvas) {
+        canvas.requestPointerLock();
+      }
+    }
+  }, [appState, settingsOpen]);
+
   // Sync synthesized ambient audio with user mute controls
   useEffect(() => {
     ambientAudio.setMute(audioMuted);
@@ -280,7 +301,7 @@ export default function MuseumExperience() {
          * and its useEffect forcibly moves the camera back to waypoint[0] = (0, 12, 20),
          * which is the camera composition break visible in the info panel screenshot.
          */}
-        {(appState === "idle" || appState === "cinematic" || appState === "ready-to-explore") && (
+        {(appState === "idle" || appState === "cinematic") && (
           <CinematicCamera
             playing={appState === "cinematic"}
             onComplete={handleCinematicComplete}
@@ -329,12 +350,11 @@ export default function MuseumExperience() {
           with NO blur/darkening — the museum stays fully visible and interactive */}
       {appState === "ready-to-explore" && !settingsOpen && (
         <div
-          onClick={handleStartExploring}
           style={{
             position: "absolute",
             inset: 0,
             zIndex: 40,
-            cursor: "pointer",
+            pointerEvents: "none", // Let all clicks pass through to canvas
           }}
         />
       )}

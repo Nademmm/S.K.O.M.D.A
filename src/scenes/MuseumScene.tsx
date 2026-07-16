@@ -442,20 +442,7 @@ export default function MuseumScene() {
         ))}
       </Suspense>
 
-      {/* Thin decorative divider lines between left zones */}
-      {[-12.5, -7.5, -2.5, 2.5, 7.5, 12.5].map((z, i) => (
-        <mesh key={`ltrim-${i}`} position={[-ROOM_WIDTH / 2 + 0.02, ROOM_HEIGHT / 2, z]}>
-          <boxGeometry args={[0.02, ROOM_HEIGHT * 0.7, 0.004]} />
-          <meshStandardMaterial
-            color="#CB2957"
-            emissive="#CB2957"
-            emissiveIntensity={0.8}
-            toneMapped={false}
-            transparent
-            opacity={0.6}
-          />
-        </mesh>
-      ))}
+
 
       {/* ═══════════════════════════════════════════════════════
           RIGHT SIDE WALL — Dark base + Architectural Zone Panels
@@ -496,20 +483,7 @@ export default function MuseumScene() {
         ))}
       </Suspense>
 
-      {/* Thin decorative divider lines between right zones */}
-      {[-12.5, -7.5, -2.5, 2.5, 7.5, 12.5].map((z, i) => (
-        <mesh key={`rtrim-${i}`} position={[ROOM_WIDTH / 2 - 0.02, ROOM_HEIGHT / 2, z]}>
-          <boxGeometry args={[0.02, ROOM_HEIGHT * 0.7, 0.004]} />
-          <meshStandardMaterial
-            color="#CB2957"
-            emissive="#CB2957"
-            emissiveIntensity={0.8}
-            toneMapped={false}
-            transparent
-            opacity={0.6}
-          />
-        </mesh>
-      ))}
+
 
       {/* ═══════════════════════════════════════════════════════
           GRAND LOBBY CENTERPIECE
@@ -664,38 +638,7 @@ export default function MuseumScene() {
         </group>
       ))}
 
-      {/* ═══════════════════════════════════════════════════════
-          GALLERY BENCHES — Premium oak slats on black steel
-          Symmetrically flanking the centerpiece (X = -4.8 / 4.8, Z = -2)
-          Oriented parallel to the Z axis (rotated Math.PI / 2) to open main aisle
-          ═══════════════════════════════════════════════════════ */}
-      {[-4.8, 4.8].map((x, idx) => (
-        <group key={`bench-${idx}`} position={[x, 0, -2]} rotation={[0, Math.PI / 2, 0]}>
-          {/* Oak wood seat surface */}
-          <mesh castShadow receiveShadow position={[0, 0.46, 0]} userData={{ obstacle: true }}>
-            <boxGeometry args={[2.5, 0.075, 0.65]} />
-            <meshStandardMaterial color="#c8a372" roughness={0.33} metalness={0.0} />
-          </mesh>
 
-          {/* Oak slat lines */}
-          {[-0.85, -0.28, 0.28, 0.85].map((sx, si) => (
-            <mesh key={si} position={[sx, 0.5, 0]}>
-              <boxGeometry args={[0.035, 0.01, 0.65]} />
-              <meshStandardMaterial color="#9a6e42" roughness={0.48} />
-            </mesh>
-          ))}
-
-          {/* Black steel legs */}
-          <mesh castShadow position={[-1.0, 0.24, 0]} userData={{ obstacle: true }}>
-            <boxGeometry args={[0.065, 0.46, 0.56]} />
-            <meshStandardMaterial color="#111111" roughness={0.45} metalness={0.45} />
-          </mesh>
-          <mesh castShadow position={[1.0, 0.24, 0]} userData={{ obstacle: true }}>
-            <boxGeometry args={[0.065, 0.46, 0.56]} />
-            <meshStandardMaterial color="#111111" roughness={0.45} metalness={0.45} />
-          </mesh>
-        </group>
-      ))}
 
       {/* ═══════════════════════════════════════════════════════
           INTERACTIVE EXHIBITS
