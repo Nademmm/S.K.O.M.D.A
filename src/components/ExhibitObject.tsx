@@ -148,9 +148,10 @@ export default function ExhibitObject({ item }: ExhibitObjectProps) {
         <meshStandardMaterial color="#F5F5F5" roughness={0.15} metalness={0.1} />
       </mesh>
 
-      {/* ── Floating Text Only, No Plaque Meshes ── */}
-      <group position={[isLeftSide ? 0.5 : -0.5, PEDESTAL_HEIGHT + 0.05, 0]} rotation={[0, isLeftSide ? Math.PI/2 : -Math.PI/2, 0]}>
+      {/* ── Premium Exhibit Nametag Plaque ── */}
+      <group position={[plaqueOffsetX, PEDESTAL_HEIGHT + 0.05, 0]} rotation={[0, plaqueRotationY, 0]}>
         <Suspense fallback={null}>
+          {/* Category Label in Accent Color */}
           <Text
             position={[0, 0.08, 0]}
             rotation={[0, 0, 0]}
@@ -158,11 +159,11 @@ export default function ExhibitObject({ item }: ExhibitObjectProps) {
             color={item.color}
             anchorX="center"
             anchorY="middle"
-            outlineWidth={0.003}
-            outlineColor="#000000"
+            letterSpacing={0.1}
           >
             {item.category.toUpperCase().replace("-", " ")}
           </Text>
+          {/* Exhibit Title in White with Dark Outline */}
           <Text
             position={[0, -0.03, 0]}
             rotation={[0, 0, 0]}
@@ -218,25 +219,7 @@ export default function ExhibitObject({ item }: ExhibitObjectProps) {
         color={item.color}
       />
 
-      {/* ── Floating Hover Title Overlay ── */}
-      {/* Only mounted when hovered (2 mount/unmount events per hover cycle) */}
-      {hovered && (
-        <Suspense fallback={null}>
-          <Text
-            position={[0, HOLO_CENTER_Y + 0.85, 0]}
-            fontSize={0.22}
-            color="#000000"
-            anchorX="center"
-            anchorY="middle"
-            outlineWidth={0.02}
-            outlineColor="#ffffff"
-            maxWidth={2.8}
-            textAlign="center"
-          >
-            {item.title}
-          </Text>
-        </Suspense>
-      )}
+
     </group>
   );
 }

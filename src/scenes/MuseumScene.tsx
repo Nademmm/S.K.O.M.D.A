@@ -404,10 +404,10 @@ export default function MuseumScene() {
       </mesh>
 
       {/* ═══════════════════════════════════════════════════════
-          LEFT SIDE WALL — Redesigned
+          LEFT SIDE WALL — Premium Timeless Design
           ═══════════════════════════════════════════════════════ */}
 
-      {/* Side wall — nicer material */}
+      {/* Base warm white wall */}
       <mesh
         position={[-ROOM_WIDTH / 2, ROOM_HEIGHT / 2, 0]}
         rotation={[0, Math.PI / 2, 0]}
@@ -415,63 +415,189 @@ export default function MuseumScene() {
         userData={{ obstacle: true }}
       >
         <planeGeometry args={[ROOM_DEPTH, ROOM_HEIGHT]} />
-        <meshStandardMaterial color="#e8e4df" roughness={0.95} metalness={0.05} />
+        <meshStandardMaterial color="#F7F6F3" roughness={0.95} />
       </mesh>
 
-      {/* Recessed panel behind text on left wall for embedded look */}
-      <Suspense fallback={null}>
-        {[
-          { z: -10, label: "SEJARAH" },
-          { z: -5, label: "TATA TERTIB" },
-          { z: 0, label: "PRESTASI" },
-          { z: 5, label: "BUDAYA" },
-          { z: 10, label: "INOVASI" },
-        ].map(({ z, label }, i) => (
-          <group key={`lzone-${i}`}>
-            {/* Deep recessed panel for embossed effect */}
-            <mesh
-              position={[-ROOM_WIDTH / 2 + 0.01, ROOM_HEIGHT - 1.1, z]}
-              rotation={[0, Math.PI / 2, 0]}
-              receiveShadow
-            >
-              <boxGeometry args={[0.04, 0.7, 1.9]} />
-              <meshStandardMaterial color="#d1c9c0" roughness={0.92} />
-            </mesh>
-            {/* Raised/Embossed text base */}
-            <Text
-              position={[-ROOM_WIDTH / 2 + 0.06, ROOM_HEIGHT - 1.1, z]}
-              fontSize={0.48}
-              color="#CB2957"
-              anchorX="center"
-              anchorY="middle"
-              rotation={[0, Math.PI / 2, 0]}
-              letterSpacing={0.15}
-            >
-              {label}
-            </Text>
-            {/* Slight shadow under text for depth */}
-            <Text
-              position={[-ROOM_WIDTH / 2 + 0.057, ROOM_HEIGHT - 1.107, z]}
-              fontSize={0.48}
-              color="#7a1a33"
-              anchorX="center"
-              anchorY="middle"
-              rotation={[0, Math.PI / 2, 0]}
-              letterSpacing={0.15}
-            >
-              {label}
-            </Text>
-          </group>
-        ))}
-      </Suspense>
+      {/* Zone 1 - SEJARAH */}
+      <group position={[-ROOM_WIDTH / 2, ROOM_HEIGHT / 2, -10]}>
+        {/* Recessed niche - light ivory (recessed into wall) */}
+        <mesh
+          position={[-0.06, 0, 0]}
+          rotation={[0, Math.PI / 2, 0]}
+          receiveShadow
+        >
+          <boxGeometry args={[0.12, 3.4, 4.2]} />
+          <meshStandardMaterial color="#F3F0EB" roughness={0.95} />
+        </mesh>
+        {/* Section header typography (inside recess) */}
+        <Suspense fallback={null}>
+          <Text
+            position={[-0.02, 1.45, 0]}
+            fontSize={0.36}
+            color="#303030"
+            anchorX="center"
+            anchorY="middle"
+            rotation={[0, Math.PI / 2, 0]}
+            letterSpacing={0.35}
+          >
+            SEJARAH
+          </Text>
+          {/* Telkom Red underline */}
+          <mesh
+            position={[-0.02, 1.2, 0]}
+            rotation={[0, Math.PI / 2, 0]}
+          >
+            <boxGeometry args={[0.015, 0.01, 1.2]} />
+            <meshStandardMaterial color="#D62B4D" />
+          </mesh>
+        </Suspense>
+      </group>
 
+      {/* Zone 2 - TATA TERTIB */}
+      <group position={[-ROOM_WIDTH / 2, ROOM_HEIGHT / 2, -5]}>
+        <mesh
+          position={[-0.06, 0, 0]}
+          rotation={[0, Math.PI / 2, 0]}
+          receiveShadow
+        >
+          <boxGeometry args={[0.12, 3.4, 4.2]} />
+          <meshStandardMaterial color="#F3F0EB" roughness={0.95} />
+        </mesh>
+        <Suspense fallback={null}>
+          <Text
+            position={[-0.02, 1.45, 0]}
+            fontSize={0.36}
+            color="#303030"
+            anchorX="center"
+            anchorY="middle"
+            rotation={[0, Math.PI / 2, 0]}
+            letterSpacing={0.35}
+          >
+            TATA TERTIB
+          </Text>
+          <mesh
+            position={[-0.02, 1.2, 0]}
+            rotation={[0, Math.PI / 2, 0]}
+          >
+            <boxGeometry args={[0.015, 0.01, 1.6]} />
+            <meshStandardMaterial color="#D62B4D" />
+          </mesh>
+        </Suspense>
+      </group>
 
+      {/* Zone 3 - PRESTASI */}
+      <group position={[-ROOM_WIDTH / 2, ROOM_HEIGHT / 2, 0]}>
+        <mesh
+          position={[-0.06, 0, 0]}
+          rotation={[0, Math.PI / 2, 0]}
+          receiveShadow
+        >
+          <boxGeometry args={[0.12, 3.4, 4.2]} />
+          <meshStandardMaterial color="#F3F0EB" roughness={0.95} />
+        </mesh>
+        <Suspense fallback={null}>
+          <Text
+            position={[-0.02, 1.45, 0]}
+            fontSize={0.36}
+            color="#303030"
+            anchorX="center"
+            anchorY="middle"
+            rotation={[0, Math.PI / 2, 0]}
+            letterSpacing={0.35}
+          >
+            PRESTASI
+          </Text>
+          <mesh
+            position={[-0.02, 1.2, 0]}
+            rotation={[0, Math.PI / 2, 0]}
+          >
+            <boxGeometry args={[0.015, 0.01, 1.4]} />
+            <meshStandardMaterial color="#D62B4D" />
+          </mesh>
+        </Suspense>
+      </group>
+
+      {/* Zone 4 - BUDAYA */}
+      <group position={[-ROOM_WIDTH / 2, ROOM_HEIGHT / 2, 5]}>
+        <mesh
+          position={[-0.06, 0, 0]}
+          rotation={[0, Math.PI / 2, 0]}
+          receiveShadow
+        >
+          <boxGeometry args={[0.12, 3.4, 4.2]} />
+          <meshStandardMaterial color="#F3F0EB" roughness={0.95} />
+        </mesh>
+        <Suspense fallback={null}>
+          <Text
+            position={[-0.02, 1.45, 0]}
+            fontSize={0.36}
+            color="#303030"
+            anchorX="center"
+            anchorY="middle"
+            rotation={[0, Math.PI / 2, 0]}
+            letterSpacing={0.35}
+          >
+            BUDAYA
+          </Text>
+          <mesh
+            position={[-0.02, 1.2, 0]}
+            rotation={[0, Math.PI / 2, 0]}
+          >
+            <boxGeometry args={[0.015, 0.01, 1.2]} />
+            <meshStandardMaterial color="#D62B4D" />
+          </mesh>
+        </Suspense>
+      </group>
+
+      {/* Zone 5 - INOVASI */}
+      <group position={[-ROOM_WIDTH / 2, ROOM_HEIGHT / 2, 10]}>
+        <mesh
+          position={[-0.06, 0, 0]}
+          rotation={[0, Math.PI / 2, 0]}
+          receiveShadow
+        >
+          <boxGeometry args={[0.12, 3.4, 4.2]} />
+          <meshStandardMaterial color="#F3F0EB" roughness={0.95} />
+        </mesh>
+        <Suspense fallback={null}>
+          <Text
+            position={[-0.02, 1.45, 0]}
+            fontSize={0.36}
+            color="#303030"
+            anchorX="center"
+            anchorY="middle"
+            rotation={[0, Math.PI / 2, 0]}
+            letterSpacing={0.35}
+          >
+            INOVASI
+          </Text>
+          <mesh
+            position={[-0.02, 1.2, 0]}
+            rotation={[0, Math.PI / 2, 0]}
+          >
+            <boxGeometry args={[0.015, 0.01, 1.3]} />
+            <meshStandardMaterial color="#D62B4D" />
+          </mesh>
+        </Suspense>
+      </group>
+
+      {/* Subtle vertical grooves between sections */}
+      {[-12.5, -7.5, -2.5, 2.5, 7.5, 12.5].map((z, i) => (
+        <mesh
+          key={`left-groove-${i}`}
+          position={[-ROOM_WIDTH / 2 + 0.01, ROOM_HEIGHT / 2, z]}
+          rotation={[0, Math.PI / 2, 0]}
+        >
+          <boxGeometry args={[0.008, ROOM_HEIGHT, 0.03]} />
+          <meshStandardMaterial color="#DDD8D2" roughness={0.95} />
+        </mesh>
+      ))}
 
       {/* ═══════════════════════════════════════════════════════
-          RIGHT SIDE WALL — Redesigned
+          RIGHT SIDE WALL — Premium Timeless Design (Symmetrical)
           ═══════════════════════════════════════════════════════ */}
 
-      {/* Side wall — nicer material */}
+      {/* Base warm white wall */}
       <mesh
         position={[ROOM_WIDTH / 2, ROOM_HEIGHT / 2, 0]}
         rotation={[0, -Math.PI / 2, 0]}
@@ -479,55 +605,180 @@ export default function MuseumScene() {
         userData={{ obstacle: true }}
       >
         <planeGeometry args={[ROOM_DEPTH, ROOM_HEIGHT]} />
-        <meshStandardMaterial color="#e8e4df" roughness={0.95} metalness={0.05} />
+        <meshStandardMaterial color="#F7F6F3" roughness={0.95} />
       </mesh>
 
-      {/* Recessed panel behind text on right wall for embedded look */}
-      <Suspense fallback={null}>
-        {[
-          { z: -10, label: "LINI MASA" },
-          { z: -5, label: "KOMPETENSI" },
-          { z: 0, label: "PENGHARGAAN" },
-          { z: 5, label: "KARAKTER" },
-          { z: 10, label: "TEKNOLOGI" },
-        ].map(({ z, label }, i) => (
-          <group key={`rzone-${i}`}>
-            {/* Deep recessed panel for embossed effect */}
-            <mesh
-              position={[ROOM_WIDTH / 2 - 0.01, ROOM_HEIGHT - 1.1, z]}
-              rotation={[0, -Math.PI / 2, 0]}
-              receiveShadow
-            >
-              <boxGeometry args={[0.04, 0.7, 1.9]} />
-              <meshStandardMaterial color="#d1c9c0" roughness={0.92} />
-            </mesh>
-            {/* Raised/Embossed text */}
-            <Text
-              position={[ROOM_WIDTH / 2 - 0.06, ROOM_HEIGHT - 1.1, z]}
-              fontSize={0.48}
-              color="#CB2957"
-              anchorX="center"
-              anchorY="middle"
-              rotation={[0, -Math.PI / 2, 0]}
-              letterSpacing={0.15}
-            >
-              {label}
-            </Text>
-            {/* Slight shadow under text for depth */}
-            <Text
-              position={[ROOM_WIDTH / 2 - 0.057, ROOM_HEIGHT - 1.107, z]}
-              fontSize={0.48}
-              color="#7a1a33"
-              anchorX="center"
-              anchorY="middle"
-              rotation={[0, -Math.PI / 2, 0]}
-              letterSpacing={0.15}
-            >
-              {label}
-            </Text>
-          </group>
-        ))}
-      </Suspense>
+      {/* Zone 1 - LINI MASA */}
+      <group position={[ROOM_WIDTH / 2, ROOM_HEIGHT / 2, -10]}>
+        <mesh
+          position={[0.06, 0, 0]}
+          rotation={[0, -Math.PI / 2, 0]}
+          receiveShadow
+        >
+          <boxGeometry args={[0.12, 3.4, 4.2]} />
+          <meshStandardMaterial color="#F3F0EB" roughness={0.95} />
+        </mesh>
+        <Suspense fallback={null}>
+          <Text
+            position={[0.02, 1.45, 0]}
+            fontSize={0.36}
+            color="#303030"
+            anchorX="center"
+            anchorY="middle"
+            rotation={[0, -Math.PI / 2, 0]}
+            letterSpacing={0.35}
+          >
+            LINI MASA
+          </Text>
+          <mesh
+            position={[0.02, 1.2, 0]}
+            rotation={[0, -Math.PI / 2, 0]}
+          >
+            <boxGeometry args={[0.015, 0.01, 1.4]} />
+            <meshStandardMaterial color="#D62B4D" />
+          </mesh>
+        </Suspense>
+      </group>
+
+      {/* Zone 2 - KOMPETENSI */}
+      <group position={[ROOM_WIDTH / 2, ROOM_HEIGHT / 2, -5]}>
+        <mesh
+          position={[0.06, 0, 0]}
+          rotation={[0, -Math.PI / 2, 0]}
+          receiveShadow
+        >
+          <boxGeometry args={[0.12, 3.4, 4.2]} />
+          <meshStandardMaterial color="#F3F0EB" roughness={0.95} />
+        </mesh>
+        <Suspense fallback={null}>
+          <Text
+            position={[0.02, 1.45, 0]}
+            fontSize={0.36}
+            color="#303030"
+            anchorX="center"
+            anchorY="middle"
+            rotation={[0, -Math.PI / 2, 0]}
+            letterSpacing={0.35}
+          >
+            KOMPETENSI
+          </Text>
+          <mesh
+            position={[0.02, 1.2, 0]}
+            rotation={[0, -Math.PI / 2, 0]}
+          >
+            <boxGeometry args={[0.015, 0.01, 1.7]} />
+            <meshStandardMaterial color="#D62B4D" />
+          </mesh>
+        </Suspense>
+      </group>
+
+      {/* Zone 3 - PENGHARGAAN */}
+      <group position={[ROOM_WIDTH / 2, ROOM_HEIGHT / 2, 0]}>
+        <mesh
+          position={[0.06, 0, 0]}
+          rotation={[0, -Math.PI / 2, 0]}
+          receiveShadow
+        >
+          <boxGeometry args={[0.12, 3.4, 4.2]} />
+          <meshStandardMaterial color="#F3F0EB" roughness={0.95} />
+        </mesh>
+        <Suspense fallback={null}>
+          <Text
+            position={[0.02, 1.45, 0]}
+            fontSize={0.36}
+            color="#303030"
+            anchorX="center"
+            anchorY="middle"
+            rotation={[0, -Math.PI / 2, 0]}
+            letterSpacing={0.35}
+          >
+            PENGHARGAAN
+          </Text>
+          <mesh
+            position={[0.02, 1.2, 0]}
+            rotation={[0, -Math.PI / 2, 0]}
+          >
+            <boxGeometry args={[0.015, 0.01, 1.8]} />
+            <meshStandardMaterial color="#D62B4D" />
+          </mesh>
+        </Suspense>
+      </group>
+
+      {/* Zone 4 - KARAKTER */}
+      <group position={[ROOM_WIDTH / 2, ROOM_HEIGHT / 2, 5]}>
+        <mesh
+          position={[0.06, 0, 0]}
+          rotation={[0, -Math.PI / 2, 0]}
+          receiveShadow
+        >
+          <boxGeometry args={[0.12, 3.4, 4.2]} />
+          <meshStandardMaterial color="#F3F0EB" roughness={0.95} />
+        </mesh>
+        <Suspense fallback={null}>
+          <Text
+            position={[0.02, 1.45, 0]}
+            fontSize={0.36}
+            color="#303030"
+            anchorX="center"
+            anchorY="middle"
+            rotation={[0, -Math.PI / 2, 0]}
+            letterSpacing={0.35}
+          >
+            KARAKTER
+          </Text>
+          <mesh
+            position={[0.02, 1.2, 0]}
+            rotation={[0, -Math.PI / 2, 0]}
+          >
+            <boxGeometry args={[0.015, 0.01, 1.5]} />
+            <meshStandardMaterial color="#D62B4D" />
+          </mesh>
+        </Suspense>
+      </group>
+
+      {/* Zone 5 - TEKNOLOGI */}
+      <group position={[ROOM_WIDTH / 2, ROOM_HEIGHT / 2, 10]}>
+        <mesh
+          position={[0.06, 0, 0]}
+          rotation={[0, -Math.PI / 2, 0]}
+          receiveShadow
+        >
+          <boxGeometry args={[0.12, 3.4, 4.2]} />
+          <meshStandardMaterial color="#F3F0EB" roughness={0.95} />
+        </mesh>
+        <Suspense fallback={null}>
+          <Text
+            position={[0.02, 1.45, 0]}
+            fontSize={0.36}
+            color="#303030"
+            anchorX="center"
+            anchorY="middle"
+            rotation={[0, -Math.PI / 2, 0]}
+            letterSpacing={0.35}
+          >
+            TEKNOLOGI
+          </Text>
+          <mesh
+            position={[0.02, 1.2, 0]}
+            rotation={[0, -Math.PI / 2, 0]}
+          >
+            <boxGeometry args={[0.015, 0.01, 1.8]} />
+            <meshStandardMaterial color="#D62B4D" />
+          </mesh>
+        </Suspense>
+      </group>
+
+      {/* Subtle vertical grooves between sections */}
+      {[-12.5, -7.5, -2.5, 2.5, 7.5, 12.5].map((z, i) => (
+        <mesh
+          key={`right-groove-${i}`}
+          position={[ROOM_WIDTH / 2 - 0.01, ROOM_HEIGHT / 2, z]}
+          rotation={[0, -Math.PI / 2, 0]}
+        >
+          <boxGeometry args={[0.008, ROOM_HEIGHT, 0.03]} />
+          <meshStandardMaterial color="#DDD8D2" roughness={0.95} />
+        </mesh>
+      ))}
 
 
 
@@ -629,6 +880,39 @@ export default function MuseumScene() {
       {museumData.map((item) => (
         <ExhibitObject key={item.id} item={item} />
       ))}
+
+      {/* ═══════════════════════════════════════════════════════
+          PREMIUM MUSEUM FURNITURE
+          ═══════════════════════════════════════════════════════ */}
+
+      {/* Central Seating Area: 4 Symmetric Premium Benches Around Orb */}
+      {[
+        { pos: [0, 0.2, -5.2], rot: 0 },         // North
+        { pos: [5.2, 0.2, -2], rot: -Math.PI / 2 },  // East
+        { pos: [0, 0.2, 1.2], rot: Math.PI },    // South
+        { pos: [-5.2, 0.2, -2], rot: Math.PI / 2 },   // West
+      ].map(({ pos, rot }, i) => (
+        <group key={`central-bench-${i}`} position={pos} rotation={[0, rot, 0]}>
+          {/* Light Oak Seat (Slim, Floating Look) */}
+          <mesh position={[0, 0.25, 0]} receiveShadow castShadow>
+            <boxGeometry args={[2.0, 0.1, 0.45]} />
+            <meshStandardMaterial color="#d4b896" roughness={0.7} />
+          </mesh>
+          {/* Matte Black Steel Legs (Minimal, Slim) */}
+          {[-0.85, 0.85].map((x, j) => (
+            <mesh key={`leg-${j}`} position={[x, 0.1, 0]} castShadow receiveShadow>
+              <boxGeometry args={[0.07, 0.2, 0.07]} />
+              <meshStandardMaterial color="#1a1a1a" roughness={0.4} metalness={0.8} />
+            </mesh>
+          ))}
+        </group>
+      ))}
+
+      {/* Subtle Brass Floor Inlay for Central Area */}
+      <mesh position={[0, 0.004, -2]} rotation={[-Math.PI/2, 0, 0]}>
+        <torusGeometry args={[3.5, 0.025, 8, 128]} />
+        <meshStandardMaterial color="#d4a058" roughness={0.3} metalness={0.9} />
+      </mesh>
     </group>
   );
 }
