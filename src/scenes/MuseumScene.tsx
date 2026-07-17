@@ -887,20 +887,20 @@ export default function MuseumScene() {
 
       {/* Central Seating Area: 4 Symmetric Premium Benches Around Orb */}
       {[
-        { pos: [0, 0.2, -5.2], rot: 0 },         // North
-        { pos: [5.2, 0.2, -2], rot: -Math.PI / 2 },  // East
-        { pos: [0, 0.2, 1.2], rot: Math.PI },    // South
-        { pos: [-5.2, 0.2, -2], rot: Math.PI / 2 },   // West
+        { pos: [0, 0, -2 - 3], rot: 0 },         // North Bench (Z minus 3, facing south/Orb)
+        { pos: [0 + 3, 0, -2], rot: -Math.PI / 2 },  // East Bench (X plus 3, facing west/Orb)
+        { pos: [0, 0, -2 + 3], rot: Math.PI },    // South Bench (Z plus 3, facing north/Orb)
+        { pos: [0 - 3, 0, -2], rot: Math.PI / 2 },   // West Bench (X minus 3, facing east/Orb)
       ].map(({ pos, rot }, i) => (
         <group key={`central-bench-${i}`} position={pos} rotation={[0, rot, 0]}>
           {/* Light Oak Seat (Slim, Floating Look) */}
-          <mesh position={[0, 0.25, 0]} receiveShadow castShadow>
+          <mesh position={[0, 0.25, 0]} receiveShadow castShadow userData={{ obstacle: true }}>
             <boxGeometry args={[2.0, 0.1, 0.45]} />
             <meshStandardMaterial color="#d4b896" roughness={0.7} />
           </mesh>
           {/* Matte Black Steel Legs (Minimal, Slim) */}
           {[-0.85, 0.85].map((x, j) => (
-            <mesh key={`leg-${j}`} position={[x, 0.1, 0]} castShadow receiveShadow>
+            <mesh key={`leg-${j}`} position={[x, 0.1, 0]} castShadow receiveShadow userData={{ obstacle: true }}>
               <boxGeometry args={[0.07, 0.2, 0.07]} />
               <meshStandardMaterial color="#1a1a1a" roughness={0.4} metalness={0.8} />
             </mesh>
