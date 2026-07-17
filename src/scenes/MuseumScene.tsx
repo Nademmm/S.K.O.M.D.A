@@ -404,10 +404,10 @@ export default function MuseumScene() {
       </mesh>
 
       {/* ═══════════════════════════════════════════════════════
-          LEFT SIDE WALL — Dark base + Architectural Zone Panels
+          LEFT SIDE WALL — Redesigned
           ═══════════════════════════════════════════════════════ */}
 
-      {/* Side wall — warm white concrete, matching original */}
+      {/* Side wall — nicer material */}
       <mesh
         position={[-ROOM_WIDTH / 2, ROOM_HEIGHT / 2, 0]}
         rotation={[0, Math.PI / 2, 0]}
@@ -415,10 +415,10 @@ export default function MuseumScene() {
         userData={{ obstacle: true }}
       >
         <planeGeometry args={[ROOM_DEPTH, ROOM_HEIGHT]} />
-        <meshStandardMaterial color="#eeeeee" roughness={0.88} />
+        <meshStandardMaterial color="#e8e4df" roughness={0.95} metalness={0.05} />
       </mesh>
 
-      {/* Left wall zone labels — museum gallery style, text directly on wall */}
+      {/* Recessed panel behind text on left wall for embedded look */}
       <Suspense fallback={null}>
         {[
           { z: -10, label: "SEJARAH" },
@@ -427,28 +427,51 @@ export default function MuseumScene() {
           { z: 5, label: "BUDAYA" },
           { z: 10, label: "INOVASI" },
         ].map(({ z, label }, i) => (
-          <Text
-            key={`lzone-text-${i}`}
-            position={[-ROOM_WIDTH / 2 + 0.04, ROOM_HEIGHT - 1.1, z]}
-            fontSize={0.18}
-            color="#CB2957"
-            anchorX="center"
-            anchorY="middle"
-            rotation={[0, Math.PI / 2, 0]}
-            letterSpacing={0.18}
-          >
-            {label}
-          </Text>
+          <group key={`lzone-${i}`}>
+            {/* Deep recessed panel for embossed effect */}
+            <mesh
+              position={[-ROOM_WIDTH / 2 + 0.01, ROOM_HEIGHT - 1.1, z]}
+              rotation={[0, Math.PI / 2, 0]}
+              receiveShadow
+            >
+              <boxGeometry args={[0.04, 0.7, 1.9]} />
+              <meshStandardMaterial color="#d1c9c0" roughness={0.92} />
+            </mesh>
+            {/* Raised/Embossed text base */}
+            <Text
+              position={[-ROOM_WIDTH / 2 + 0.06, ROOM_HEIGHT - 1.1, z]}
+              fontSize={0.48}
+              color="#CB2957"
+              anchorX="center"
+              anchorY="middle"
+              rotation={[0, Math.PI / 2, 0]}
+              letterSpacing={0.15}
+            >
+              {label}
+            </Text>
+            {/* Slight shadow under text for depth */}
+            <Text
+              position={[-ROOM_WIDTH / 2 + 0.057, ROOM_HEIGHT - 1.107, z]}
+              fontSize={0.48}
+              color="#7a1a33"
+              anchorX="center"
+              anchorY="middle"
+              rotation={[0, Math.PI / 2, 0]}
+              letterSpacing={0.15}
+            >
+              {label}
+            </Text>
+          </group>
         ))}
       </Suspense>
 
 
 
       {/* ═══════════════════════════════════════════════════════
-          RIGHT SIDE WALL — Dark base + Architectural Zone Panels
+          RIGHT SIDE WALL — Redesigned
           ═══════════════════════════════════════════════════════ */}
 
-      {/* Side wall — warm white concrete, matching original */}
+      {/* Side wall — nicer material */}
       <mesh
         position={[ROOM_WIDTH / 2, ROOM_HEIGHT / 2, 0]}
         rotation={[0, -Math.PI / 2, 0]}
@@ -456,10 +479,10 @@ export default function MuseumScene() {
         userData={{ obstacle: true }}
       >
         <planeGeometry args={[ROOM_DEPTH, ROOM_HEIGHT]} />
-        <meshStandardMaterial color="#eeeeee" roughness={0.88} />
+        <meshStandardMaterial color="#e8e4df" roughness={0.95} metalness={0.05} />
       </mesh>
 
-      {/* Right wall zone labels — museum gallery style, text directly on wall */}
+      {/* Recessed panel behind text on right wall for embedded look */}
       <Suspense fallback={null}>
         {[
           { z: -10, label: "LINI MASA" },
@@ -468,18 +491,41 @@ export default function MuseumScene() {
           { z: 5, label: "KARAKTER" },
           { z: 10, label: "TEKNOLOGI" },
         ].map(({ z, label }, i) => (
-          <Text
-            key={`rzone-text-${i}`}
-            position={[ROOM_WIDTH / 2 - 0.04, ROOM_HEIGHT - 1.1, z]}
-            fontSize={0.18}
-            color="#CB2957"
-            anchorX="center"
-            anchorY="middle"
-            rotation={[0, -Math.PI / 2, 0]}
-            letterSpacing={0.18}
-          >
-            {label}
-          </Text>
+          <group key={`rzone-${i}`}>
+            {/* Deep recessed panel for embossed effect */}
+            <mesh
+              position={[ROOM_WIDTH / 2 - 0.01, ROOM_HEIGHT - 1.1, z]}
+              rotation={[0, -Math.PI / 2, 0]}
+              receiveShadow
+            >
+              <boxGeometry args={[0.04, 0.7, 1.9]} />
+              <meshStandardMaterial color="#d1c9c0" roughness={0.92} />
+            </mesh>
+            {/* Raised/Embossed text */}
+            <Text
+              position={[ROOM_WIDTH / 2 - 0.06, ROOM_HEIGHT - 1.1, z]}
+              fontSize={0.48}
+              color="#CB2957"
+              anchorX="center"
+              anchorY="middle"
+              rotation={[0, -Math.PI / 2, 0]}
+              letterSpacing={0.15}
+            >
+              {label}
+            </Text>
+            {/* Slight shadow under text for depth */}
+            <Text
+              position={[ROOM_WIDTH / 2 - 0.057, ROOM_HEIGHT - 1.107, z]}
+              fontSize={0.48}
+              color="#7a1a33"
+              anchorX="center"
+              anchorY="middle"
+              rotation={[0, -Math.PI / 2, 0]}
+              letterSpacing={0.15}
+            >
+              {label}
+            </Text>
+          </group>
         ))}
       </Suspense>
 
