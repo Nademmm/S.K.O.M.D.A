@@ -76,6 +76,7 @@ export const museumData: ExhibitItem[] = [
       "Bel masuk sekolah berbunyi pukul 07.00 WIB setiap hari kerja.",
     ],
     icon: "clock",
+    imageUrl: "/images/exhibits/tt-1.jpg",
     description:
       "Siswa wajib hadir di sekolah tepat waktu, maksimal 15 menit sebelum bel masuk berbunyi. Keterlambatan tanpa keterangan yang sah akan dikenakan sanksi sesuai tata tertib sekolah.",
     position: [-9, 0, -6],
@@ -92,6 +93,7 @@ export const museumData: ExhibitItem[] = [
       "Atribut lengkap meliputi badge OSIS, nama siswa, dan logo sekolah.",
     ],
     icon: "uniform",
+    imageUrl: "/images/exhibits/tt-2.jpg",
     description:
       "Siswa wajib mengenakan seragam sesuai jadwal yang ditentukan, lengkap dengan atribut sekolah, rapi, dan sopan selama berada di lingkungan sekolah.",
     position: [-9, 0, -2],
@@ -108,6 +110,7 @@ export const museumData: ExhibitItem[] = [
       "Siswa berdiri dan memberi salam saat guru memasuki dan meninggalkan kelas.",
     ],
     icon: "class",
+    imageUrl: "/images/exhibits/tt-3.jpg",
     description:
       "Siswa diwajibkan menjaga ketenangan, menghormati guru dan teman, serta aktif mengikuti kegiatan belajar mengajar di dalam kelas.",
     position: [-9, 0, 2],
@@ -124,6 +127,7 @@ export const museumData: ExhibitItem[] = [
       "Program Jumat Bersih diadakan rutin untuk membersihkan seluruh area sekolah.",
     ],
     icon: "broom",
+    imageUrl: "/images/exhibits/tt-4.jpg",
     description:
       "Setiap siswa bertanggung jawab menjaga kebersihan kelas, koridor, dan seluruh area sekolah, termasuk membuang sampah pada tempatnya.",
     position: [-9, 0, 6],
@@ -140,6 +144,7 @@ export const museumData: ExhibitItem[] = [
       "Setiap pelanggaran dicatat dalam buku BK dan dilaporkan kepada orang tua.",
     ],
     icon: "shield",
+    imageUrl: "/images/exhibits/tt-5.jpg",
     description:
       "Membawa barang terlarang, melakukan tindakan kekerasan, atau perilaku tidak terpuji lainnya akan dikenakan sanksi bertahap sesuai buku poin pelanggaran sekolah.",
     position: [-9, 0, 10],
@@ -158,6 +163,7 @@ export const museumData: ExhibitItem[] = [
       "5S terbukti menciptakan lingkungan belajar yang lebih positif dan produktif.",
     ],
     icon: "greeting",
+    imageUrl: "/images/exhibits/bd-1.jpg",
     description:
       "Budaya 5S (Senyum, Salam, Sapa, Sopan, Santun) diterapkan setiap hari sebagai bentuk penghormatan antarwarga sekolah.",
     position: [9, 0, -6],
@@ -174,6 +180,7 @@ export const museumData: ExhibitItem[] = [
       "Gotong royong juga diterapkan dalam kegiatan OSIS dan kepanitiaan acara sekolah.",
     ],
     icon: "hands",
+    imageUrl: "/images/exhibits/bd-2.jpg",
     description:
       "Sekolah menjunjung tinggi nilai gotong royong melalui kegiatan kerja bakti rutin dan kolaborasi antar siswa dalam berbagai kegiatan.",
     position: [9, 0, -2],
@@ -190,6 +197,7 @@ export const museumData: ExhibitItem[] = [
       "Ekskul wajib diikuti minimal 1 oleh setiap siswa mulai dari kelas X.",
     ],
     icon: "trophy",
+    imageUrl: "/images/exhibits/bd-3.jpg",
     description:
       "Beragam kegiatan ekstrakurikuler tersedia untuk mengembangkan bakat siswa, mulai dari bidang akademik, seni, hingga olahraga.",
     position: [9, 0, 2],
@@ -206,6 +214,7 @@ export const museumData: ExhibitItem[] = [
       "Siswa diajarkan lagu-lagu nasional dan sejarah bendera Merah Putih.",
     ],
     icon: "flag",
+    imageUrl: "/images/exhibits/bd-4.jpg",
     description:
       "Upacara bendera rutin setiap Senin menumbuhkan rasa cinta tanah air dan disiplin bagi seluruh warga sekolah.",
     position: [9, 0, 6],
@@ -222,6 +231,7 @@ export const museumData: ExhibitItem[] = [
       "Batik hari Rabu menggunakan motif batik khas Sidoarjo yang dipilih OSIS.",
     ],
     icon: "culture",
+    imageUrl: "/images/exhibits/bd-5.jpg",
     description:
       "Sekolah melestarikan budaya lokal melalui kegiatan seni tradisional, bahasa daerah, dan perayaan hari besar budaya Indonesia.",
     position: [9, 0, 10],
