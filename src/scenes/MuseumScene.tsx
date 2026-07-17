@@ -5,6 +5,7 @@ import * as THREE from "three";
 import { Text } from "@react-three/drei";
 import ExhibitObject from "@/components/ExhibitObject";
 import { museumData } from "@/utils/museumData";
+import LogoCenterpiece from "@/components/LogoCenterpiece";
 
 // Simple seedable pseudo-random generator to remain pure and satisfy react-hooks/purity rules
 function createRandom(seed: number) {
@@ -829,45 +830,8 @@ export default function MuseumScene() {
           />
         </mesh>
 
-        {/* Abstract geometric centerpiece sculpture */}
-        <group position={[0, 1.65, 0]}>
-          {/* Ring 1 — red accent */}
-          <mesh rotation={[0, 0, 0]}>
-            <torusGeometry args={[0.7, 0.08, 16, 48]} />
-            <meshStandardMaterial color="#CB2957" roughness={0.22} metalness={0.68} />
-          </mesh>
-          {/* Ring 2 — matte black */}
-          <mesh rotation={[Math.PI / 3, Math.PI / 4, 0]}>
-            <torusGeometry args={[0.72, 0.08, 16, 48]} />
-            <meshStandardMaterial color="#181818" roughness={0.58} metalness={0.82} />
-          </mesh>
-          {/* Ring 3 — chrome steel */}
-          <mesh rotation={[Math.PI / 3, -Math.PI / 4, 0]}>
-            <torusGeometry args={[0.74, 0.08, 16, 48]} />
-            <meshStandardMaterial color="#dddddd" roughness={0.04} metalness={0.96} />
-          </mesh>
-          {/* Glowing core sphere */}
-          <mesh>
-            <sphereGeometry args={[0.18, 24, 24]} />
-            <meshStandardMaterial
-              color="#ffffff"
-              emissive="#ffffff"
-              emissiveIntensity={2.2}
-              toneMapped={false}
-            />
-          </mesh>
-        </group>
-
-        {/* Centerpiece dramatic spotlight */}
-        <spotLight
-          position={[0, 0.28, 0]}
-          angle={0.58}
-          penumbra={0.5}
-          intensity={10}
-          color="#FFF0E5"
-        />
-        {/* Red glow around sculpture */}
-        <pointLight position={[0, 1.65, 0]} intensity={2.0} distance={6} color="#CB2957" />
+        {/* ─── Premium 3-D Logo Centerpiece ─────────────────────── */}
+        <LogoCenterpiece />
       </group>
 
 
@@ -887,10 +851,10 @@ export default function MuseumScene() {
 
       {/* Central Seating Area: 4 Symmetric Premium Benches Around Orb */}
       {[
-        { pos: [0, 0, -2 - 3], rot: 0 },         // North Bench (Z minus 3, facing south/Orb)
-        { pos: [0 + 3, 0, -2], rot: -Math.PI / 2 },  // East Bench (X plus 3, facing west/Orb)
-        { pos: [0, 0, -2 + 3], rot: Math.PI },    // South Bench (Z plus 3, facing north/Orb)
-        { pos: [0 - 3, 0, -2], rot: Math.PI / 2 },   // West Bench (X minus 3, facing east/Orb)
+        { pos: [0, 0, -2 - 3] as [number, number, number], rot: 0 },         // North Bench (Z minus 3, facing south/Orb)
+        { pos: [0 + 3, 0, -2] as [number, number, number], rot: -Math.PI / 2 },  // East Bench (X plus 3, facing west/Orb)
+        { pos: [0, 0, -2 + 3] as [number, number, number], rot: Math.PI },    // South Bench (Z plus 3, facing north/Orb)
+        { pos: [0 - 3, 0, -2] as [number, number, number], rot: Math.PI / 2 },   // West Bench (X minus 3, facing east/Orb)
       ].map(({ pos, rot }, i) => (
         <group key={`central-bench-${i}`} position={pos} rotation={[0, rot, 0]}>
           {/* Light Oak Seat (Slim, Floating Look) */}
